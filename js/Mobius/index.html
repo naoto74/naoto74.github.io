@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="JavaScriptでメビウス変換 Möbius transformation">
+    <title>JavaScriptとcanvasでメビウス変換</title>
+
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="topBar">
+        <div class="goTop">
+            <a href="/">
+                <img src="/image/title.svg" alt="HTML,CSS,JavaScriptで作ったもの集" width="200" height="48" decoding="async">
+            </a>
+        </div>
+    </div>
+    <div class="mainContent" style="flex-direction: column;">
+        <div class="contentBody">
+            <h2>JavaScriptでメビウス変換</h2>
+            <p class="summary">JavaScriptでメビウス変換az+b / cz+dを複素数で計算して描画。不思議な変換です。</p>
+            <p>
+        自動のチェックを外すと手動で調整できます。<br>
+		これについて<a href="https://ja.wikipedia.org/wiki/メビウス変換" target="_blank">ja.wikipedia.org/wiki/メビウス変換</a>
+            </p>
+            <div class="canvasContent">
+            <canvas id="canvas" width="500" height="500"></canvas>
+            <p class="CN" style="border:1px solid #000;">
+                自動<input type="checkbox" checked><BR>
+                A<input type="range" value="1"><input type="range" value="1"><BR>
+                B<input type="range" value="0"><input type="range" value="0"><BR>
+                C<input type="range" value="0"><input type="range" value="0"><BR>
+                D<input type="range" value="1"><input type="range" value="1"><BR>
+            </p>
+            </div>
+        </div>
+    </div>
+    <!--<div class="bottomBar"></div>-->
+    <script src="main.js"></script>
+</body>
+</html>

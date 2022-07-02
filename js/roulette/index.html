@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="JavaScriptとSVGでルーレットを作ってみた">
+    <title>JavaScriptとSVGでルーレット</title>
+
+    <link rel="stylesheet" href="/css/top.css">
+    <link rel="stylesheet" href="/css/preCode.css">
+</script>
+</head>
+<body>
+    <div class="topBar">
+        <div class="goTop">
+            <a href="/">
+                <img src="/image/title.svg" alt="HTML,CSS,JavaScriptで作ったもの集" width="200" height="48" decoding="async">
+            </a>
+        </div>
+    </div>
+    <div class="mainContent">
+        <div class="contentTitle"><h1>JavaScriptでルーレット</h1></div>
+        <p class="summary">JavaScriptを使ってルーレットを作ってみました。</p>
+        <a href="https://jp.piliapp.com/random/wheel/" target="_blank">参考にした動き</a>
+        <a href="https://fuuno.net/ani/ani41/ani41.html" target="_blank">参考にしたSVG</a>
+        
+        <div class="contentBody">
+            <h2 class="URLtitle">JavaScriptとSVGとCSSでルーレットを回転させる</h2>
+            <div class="viewBody">
+            <div id="viewFrame" class=".body">
+<div class="outputDiv">
+    <svg id="roulette" viewBox="-50 -50 100 100">
+    </svg>
+    <p>結果は...<span id="rouletteResult"></span></p>
+</div>
+<div class="detail">
+	<p>
+        JavaScriptとSVGとCSSでルーレットを回転させました。
+	</p>
+</div>
+<script data-file="main.js">
+    window.AudioContext = window.AudioContext || window.webkitAudioContext;
+    var audioBuffer = null;
+    var audioContext = null;
+    var audioSource = null;
+
+    var roulette = document.getElementById("roulette");
+    var rouletteResult = document.getElementById("rouletteResult");
+    //表示系
+    var rouletteGroup = createSVG("g"); //円盤の回転グループ
+    rouletteGroup.id = "rouletteGroup";
+    roulette.appendChild(rouletteGroup);
+    
+    var roulettePointer = createSVG("path");
+    roulettePointer.setAttribute("fill","red");
+    roulettePointer.setAttribute("stroke","white");
+    roulette.appendChild(roulettePointer);
+
+    var rouletteSize = 100;             //円盤の大きさ
+    var rouletteTurnFlg = false;
+    var textMargin = 30;                //字の中心からの空白
+    var textSize = 10;                  //字のサイズ
+    var rouletteAngle = 0;              //0以上の角度
+    var circleData = ["Python","C#.NET","C/C++","Java","JavaScript","PHP","Ruby","COBOL","Go","Perl","Scala","Swift"];
+    
+    function resetRoulette(){
+        var offsetCount = 0;
+        roulette.setAttribute("viewBox",`${-rouletteSize} ${-rouletteSize} ${rouletteSize*2+20} ${rouletteSize*2+20}`);
+        rouletteGroup.style.transform = "rotate("+rouletteAngle+"deg)";
+        //最後の子要素があるまで 子要素を削除
+        while(rouletteGroup.lastChild) rouletteGroup.removeChild(rouletteGroup.lastChild);
+
+        for(var i=0;i<circleData.length;i++){
+            var rotate = -360/circleData.length;
+            var pathTheta = 3.14/180*rotate;
+
+            var startX = rouletteSize;
+            var startY = 0;
+            var endX = Math.cos(pathTheta)*rouletteSize;
+            var endY = Math.sin(pathTheta)*rouletteSize;
+            var pathArc = `M0,0 L${startX},${startY} A${rouletteSize},${rouletteSize} 0 0,0 ${endX},${endY}z`;
+
+            var group = createSVG("g");
+            group.setAttribute("data-text", circleData[i]);
+            group.style.transform = `rotate(${rotate*i}deg)`;
+
+            var path = createSVG("path");
+            path.setAttribute("data-text", circleData[i]);
+            path.setAttribute("d",pathArc);
+            path.setAttribute("fill",`hsl(${(i%7)*36},100%,50%)`);
+
+            var text = createSVG("text");
+            text.setAttribute("data-text", circleData[i]);
+            text.setAttribute("font-size", textSize);
+            text.setAttribute("dx", textMargin);
+            text.textContent = circleData[i];
+            text.style.transform = `rotate(${rotate/2}deg)`;
+
+            group.appendChild(path);
+            group.appendChild(text);
+            rouletteGroup.appendChild(group);
+        }
+        roulettePointer.setAttribute("d",`M${rouletteSize+10},-10 L${rouletteSize-10},0 L${rouletteSize+10},10 Z`);
+    }
+    function resultOfRoulette(mode){
+        //true:要素の見かけから計算 false,undefined:rouletteAngleから計算
+        if(mode){
+            //ポインターの位置
+            var position = roulettePointer.getBoundingClientRect();
+            //ポインターの先にある要素
+            var element = document.elementFromPoint(position.x-5,position.y+position.height/2);
+            return element.dataset.text;
+        }else{
+            return circleData[Math.floor( ((rouletteAngle%360)/(360/circleData.length)) )%circleData.length];
+        }
+    }
+    function playSound(){
+        if(audioContext == null){
+            audioContext = new AudioContext();
+            var request = new XMLHttpRequest();
+            request.open("GET", "sample.wav");
+            request.responseType = "arraybuffer";
+            request.onload = function(){
+                audioContext.decodeAudioData(request.response,function(buffer){
+                    audioBuffer = buffer;
+                });
+            }
+            request.send();
+        }
+        audioSource = audioContext.createBufferSource();
+        audioSource.buffer = audioBuffer;
+        audioSource.connect(audioContext.destination);
+        audioSource.start(0);
+    }
+    async function turnRoulette(){
+        rouletteAngle += Math.random()*1000+10000;
+        rouletteGroup.style.transform = `rotate(${rouletteAngle}deg)`;
+        rouletteTurnFlg = true;
+        var nowText = resultOfRoulette(true);
+        var oldText;
+        while(rouletteTurnFlg){
+            oldText = nowText;
+            nowText = resultOfRoulette(true);
+            if(oldText != nowText){
+                playSound();
+            }
+            await (new Promise(e=>setTimeout(e,50)));
+        }
+    }
+    
+    function createSVG(tagName){
+        return document.createElementNS("http://www.w3.org/2000/svg",tagName);
+    }
+    //クリックイベント
+    rouletteGroup.addEventListener("mousedown",function(e){turnRoulette();},{passive:true});
+    rouletteGroup.addEventListener("touchstart",function(e){turnRoulette();},{passive:true});
+
+    //アニメーション終了イベント
+    rouletteGroup.addEventListener("transitionend",function(e){
+        rouletteTurnFlg = false;
+        rouletteResult.innerText = resultOfRoulette()+"!";
+    },{passive:true});
+
+    
+    resetRoulette();
+</script>
+<style data-file="style.css">
+.outputDiv{
+    text-align: center;
+}
+#roulette{
+    width:500px;
+}
+#rouletteGroup{
+    transition-duration: 8s;
+    transition-timing-function: cubic-bezier(0.24, -0.1, 0.05, 1);
+}
+#rouletteGroup text{
+    stroke:#000;
+    font-weight: normal;
+    dominant-baseline:middle;
+}
+@media (max-width: 800px){
+	#roulette{
+		width:100%;
+	}
+}
+</style>
+            </div>
+            <script src="/js/preCode.js" defer></script>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

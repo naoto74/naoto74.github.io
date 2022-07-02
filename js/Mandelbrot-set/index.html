@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="GLSLでマンデルブロ集合(Mandelbrot_set)">
+  <title>GLSLでマンデルブロ集合 Mandelbrot set</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/top.css">
+  <link rel="stylesheet" href="/css/preCode.css">
+  <head>
+
+  <body>
+    <div class="topBar">
+        <div class="goTop">
+            <a href="/">
+                <img src="/image/title.svg" alt="HTML,CSS,JavaScriptで作ったもの集" width="200" height="48" decoding="async">
+            </a>
+        </div>
+    </div>
+    <div class="mainContent">
+        <div class="contentTitle"><h1>マンデルブロ集合</h1></div>
+        <div class="contentBody">
+            <h2 class="URLtitle">JavaScriptとGLSLでマンデルブロ集合</h2>
+            <p class="summary">JavaScriptとGLSLを使ってマンデルブロ集合を計算してみました。<br>GLSLによる並列処理でCPUよりあまりカクカクしていません。</p>
+            <p>
+              <a href="https://ja.wikipedia.org/wiki/%E3%83%9E%E3%83%B3%E3%83%87%E3%83%AB%E3%83%96%E3%83%AD%E9%9B%86%E5%90%88" target="_blank">ja.wikipedia.org/wiki/マンデルブロ集合</a>
+            </p>
+            <div class="viewBody">
+            <div id="viewFrame" class=".body">
+    <div style="display: flex;flex-direction: column;align-items: center;">
+      <canvas id="canvas" style="image-rendering: pixelated;"></canvas>
+      <div style="border:1px solid #000;">
+        <label for="STARTorSTOP">START/STOP</label>
+        <input id="STARTorSTOP" type="checkbox" checked>
+      </div>
+    </div>
+    
+  <script id="fs" type="shader">
+    precision highp float;
+    uniform float scale;
+    uniform vec2  resolution;
+    vec3 hsv(float h, float s, float v){
+      vec4 t = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+      vec3 p = abs(fract(vec3(h) + t.xyz) * 6.0 - vec3(t.w));
+      return v * mix(vec3(t.x), clamp(p - vec3(t.x), 0.0, 1.0), s);
+    }
+    void main(void){
+      vec2 p = (gl_FragCoord.xy * 2.0 - resolution) / max(resolution.x / 2.0, resolution.y / 2.0);
+      vec2 z = vec2(0.0,0.0);
+      vec2 c = (p/scale) + vec2($randomPos$);
+      float maxi = 0.0;
+      for(int i=0;i<500;i++){
+        z = vec2((z.x*z.x)-(z.y*z.y), (2.0*z.x)*z.y) + c;
+        if(length(z)>2.0){
+          maxi = float(i);
+          break;
+        }
+      }
+      gl_FragColor = vec4(hsv(maxi/10.0,1.0,1.0),1.0);
+    }
+    </script>
+      <script id="vs" type="shader">
+    attribute vec3 position;
+    void main(void){
+      gl_Position = vec4(position, 1.0);
+    }
+    </script>
+    
+    <script type="module" data-file="main.js">
+      const canvas = document.getElementById("canvas");
+      const gl = canvas.getContext('webgl');
+      const STARTorSTOP = document.getElementById("STARTorSTOP");
+      const cw = 256;
+      const ch = 256;
+      canvas.width = cw;
+      canvas.height = ch;
+
+      const randPosArr = [
+          {x:  0.35839851510284204, y:  0.113114675708664650 , maxScale: 5000},
+          {x: -0.52687466906013570, y:  0.619495491044155600 , maxScale: 8000},
+          {x: -1.94253221413865400, y: -0.000004544515496045 , maxScale: 200000},
+          {x: -0.99495022447275460, y: -0.250201639625839100 , maxScale: 5000},
+          {x:  0.12910948559333138, y:  0.589791746391213000 , maxScale: 5000}
+      ];
+      let posindex = 0;
+      let uniform = {};
+      let scale;
+      
+      function reset(){
+        const randPos = [randPosArr[posindex%randPosArr.length].x , randPosArr[posindex%randPosArr.length].y ];
+        const program = gl.createProgram();
+
+        const vShader = gl.createShader(gl.VERTEX_SHADER);
+        gl.shaderSource(vShader, document.getElementById('vs').text);
+        gl.compileShader(vShader);
+        gl.attachShader(program, vShader);
+
+        const fShader = gl.createShader(gl.FRAGMENT_SHADER);
+        gl.shaderSource(fShader, document.getElementById('fs').text.replace("$randomPos$", randPos.join(",")));
+        gl.compileShader(fShader);
+        gl.attachShader(program, fShader);
+
+        gl.linkProgram(program);
+        gl.useProgram(program);
+
+        uniform.scale = gl.getUniformLocation(program, 'scale');
+        uniform.resolution = gl.getUniformLocation(program, 'resolution');
+        
+        gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, 1, 0, -1, -1, 0, 1, 1, 0, 1, -1, 0]), gl.STATIC_DRAW);
+
+        const attribute = gl.getAttribLocation(program, 'position');
+        gl.enableVertexAttribArray(attribute);
+        gl.vertexAttribPointer(attribute, 3, gl.FLOAT, false, 0, 0);
+        scale = 0.5;
+      }
+
+      function loop(){
+        if(STARTorSTOP.checked){
+          scale *= 1.005;
+          gl.viewport(0, 0, cw, ch);
+          gl.clearColor(0, 0, 0, 1);
+          gl.clear(gl.COLOR_BUFFER_BIT);
+          gl.uniform1f(uniform.scale, scale);
+          gl.uniform2fv(uniform.resolution, [cw, ch]);
+          gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+          gl.flush();
+          if (randPosArr[posindex%randPosArr.length].maxScale < scale) {
+            posindex++;
+            reset();
+          };
+        }
+        requestAnimationFrame(loop);
+      };
+      reset();
+      loop();
+  </script>
+  </div>
+  <script src="/js/preCode.js" defer></script>
+  </div>
+      </div>
+  </div>
+  </body>
+
+</html>

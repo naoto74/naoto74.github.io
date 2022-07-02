@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="JavaScriptで立方体の角だけ等角図で描画">
+    <title>JavaScriptとcanvasで等角図</title>
+
+    <link rel="stylesheet" href="/css/top.css">
+    <link rel="stylesheet" href="/css/preCode.css">
+</head>
+<body>
+    <div class="topBar">
+        <div class="goTop">
+            <a href="/">
+                <img src="/image/title.svg" alt="HTML,CSS,JavaScriptで作ったもの集" width="200" height="48" decoding="async">
+            </a>
+        </div>
+    </div>
+    <div class="mainContent">
+        <div class="contentTitle"><h1>等角図</h1></div>
+        <p class="summary">JavaScriptを使って等角図を描画しました。<br>立方体のかどだけしか描画してないのでしょぼいです。</p>
+        <div class="contentBody">
+            <h2 class="URLtitle">JavaScriptで立方体の角だけ等角図で描画</h2>
+            <div class="viewBody">
+            <div id="viewFrame" class=".body">
+<div class="outputDiv">
+	<canvas id="canvas" width="300" height="300"></canvas>
+	<p><span id="fps">0</span>fps</p>
+</div>
+<div class="detail">
+	<p>
+	これはJavaScriptを使った角の等角図の描画です。
+	</p>
+</div>
+<script type="module" data-file="main.js">
+var output = document.getElementById("fps");
+var canvas = document.getElementById("canvas");
+var context = canvas.getContext("2d");
+canvas.style.border = "1px solid #000";
+var cw = canvas.width;
+var ch = canvas.height;
+var cw2 = cw/2;
+var ch2 = ch/2;
+var fpscount = 0;
+var fps = 0;
+var rad = 3.14/180;
+/*
+インデックスを二進数にしてある。
+000 -> 0
+001 -> 1
+010 -> 2
+011 -> 3
+100 -> 4
+           [001]ZZZZZZZZZZZZZZZZZZ[101]
+         Z   |                       Z
+       Z     |                     Z |
+     Z       |                  Z    |   
+  [000]ZZZZZZZZZZZZZZZZZZZZ[100]     |   
+    |        |                 |     |           
+    |        |                 |     |           
+    |        |                 |     |           
+    |        |                 |     |           
+    |        |                 |     |           
+    |      [011]ZZZZZZZZZZZZZZZ|[111]|
+    |    Z                     |    Z
+    |  Z                       |  Z
+    |Z                         |Z
+  [010]ZZZZZZZZZZZZZZZZZZZZ[110]
+           [1]ZZZZZZZZZZZZZZZZZZZZZZ[5]
+         Z   |                       Z
+       Z     |                     Z |
+     Z       |                  Z    |   
+    [0]ZZZZZZZZZZZZZZZZZZZZZZ[4]     |   
+    |        |                 |     |           
+    |        |                 |     |           
+    |        |                 |     |           
+    |        |                 |     |           
+    |        |                 |     |           
+    |      [3]ZZZZZZZZZZZZZZZZZ|ZZ[7]|
+    |    Z                     |    Z
+    |  Z                       |  Z
+    |Z                         |Z
+    [2]ZZZZZZZZZZZZZZZZZZZZZZ[6]
+*/
+var position = [
+    new pos(0,0,0),
+    new pos(0,0,1),
+    new pos(0,1,0),
+    new pos(0,1,1),
+    new pos(1,0,0),
+    new pos(1,0,1),
+    new pos(1,1,0),
+    new pos(1,1,1)
+];
+var polygon = [
+    [0,4,6,2],
+    [2,3,7,6],
+    [3,7,5,1],
+    [1,5,4,0],
+    [2,3,1,0],
+    [6,7,5,4],
+];
+
+function loop(){
+    context.clearRect(0,0,cw,ch);
+    for(var i=0;i<polygon.length;i++){
+        var tmp = polygon[i].map(e=>position[e].to2d(cw/3));
+        context.strokeStyle = `hsl(${i/polygon.length*360},100%,50%)`;
+	    context.beginPath();
+        context.moveTo(tmp[0].x+cw2, tmp[0].y+ch2, 3, 0, 6.28);
+        tmp.forEach(e=>{
+            context.lineTo(e.x+cw2, e.y+ch2, 3, 0, 6.28);
+        });
+	    context.closePath();
+        context.stroke();
+    }
+    /*for(var i=0;i<position.length;i++){
+        position[i] = position[i].sub(new pos(0.5, 0.5, 0.5)).rotez(rad).add(new pos(0.5, 0.5, 0.5)); 
+    }*/
+    fpscount++;
+    requestAnimationFrame(loop);
+}
+
+function pos(x,y,z){
+    this.x = x;
+    this.y = y;
+    this.z = z;
+}
+pos.prototype.to2d = function(v){
+    var x = this.x - this.y;
+    var y = this.x*0.5 + this.y*0.5 - this.z;
+    x*=v;y*=v;
+    return {x,y};
+}
+pos.prototype.add = function(v){
+    return new pos(this.x+v.x, this.y+v.y, this.z+v.z);
+}
+pos.prototype.sub = function(v){
+    return new pos(this.x-v.x, this.y-v.y, this.z-v.z);
+}
+pos.prototype.scale = function(v){
+    return new pos(this.x*v, this.y*v, this.z*v);
+}
+pos.prototype.rotex = function(theta){
+    return new pos(this.x, Math.cos(theta)*this.y - Math.sin(theta)*this.z, Math.sin(theta)*this.y + Math.cos(theta)*this.z);
+}
+pos.prototype.rotey = function(theta){
+    return new pos(Math.cos(theta)*this.x - Math.sin(theta)*this.z, this.y, Math.sin(theta)*this.x + Math.cos(theta)*this.z);
+}
+pos.prototype.rotez = function(theta){
+    return new pos(Math.cos(theta)*this.x - Math.sin(theta)*this.y, Math.sin(theta)*this.x + Math.cos(theta)*this.y, this.z);
+}
+setInterval(function(){
+    output.innerText = fps = fpscount;fpscount = 0;
+},1000);
+loop();
+</script>
+<style data-file="style.css">
+.body{
+	width:100%;
+	height:100%;
+	display:flex;
+	flex-direction: row;
+}
+.body #canvas{
+	width:500px;
+}
+@media (max-width: 800px){
+	.mainContent{
+		flex-direction: column;
+	}
+	.mainContent #canvas{
+		width:100%;
+	}
+}
+.outputDiv{
+	flex:1;
+}
+.detail{
+	width:200px;
+}
+</style>
+            </div>
+            <script src="/js/preCode.js" defer></script>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

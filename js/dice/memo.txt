@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1, minimum-scale=0, maximum-scale=10, user-scalable=yes">
+    <meta name="description" content="クトゥルフ神話やTRPGでダイスを回すときに使う、少し謎があるツール。">
+    <title>クトゥルフ神話|TRPG ダイスロールツール</title>
+    <link rel="preload" as="image" href="dice-PR.webp" type="image/webp">
+    <style>
+        ::-webkit-scrollbar {
+            display: none;
+        }
+        audio {
+            display: none;
+        }
+        .jslink {
+            color: #000;
+            font-size: 25px;
+            text-decoration: underline;
+            text-decoration-color: #00f;
+            background-color: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .jslink:hover {
+            color: #fff;
+            background: #00c;
+        }
+        .container {
+            margin: 0;
+        }
+        .container>h3 {
+            padding-left: 20px;
+        }
+        .dicediv {
+            position: relative;
+            box-shadow: 0 0 5px #000;
+            width: 100%;
+            display: inline-block;
+            border-radius: 20px;
+            border: 3px solid #eee;
+            background-color: #e8e8e8;
+            box-sizing: border-box;
+            margin-bottom: 15px;
+        }
+        .dicebody {
+            user-select: none;
+            max-height: 0;
+            display: none;
+        }
+        .ddisplay:checked + .dicebody {
+            max-height: none;
+            display: block;
+        }
+        .dicehead {
+            position: relative;
+        }
+        .dicehead {
+            text-align: center;
+            background-color: #eee;
+            margin: 0 10px 0 10px;
+            font-size: 30px;
+        }
+        .dicebody {
+            position: relative;
+            text-align: center;
+        }
+        .dicebody>.result {
+            font-weight: 700;
+            font-size: 50px;
+            margin: 0;
+        }
+        @keyframes rote {
+            100% {
+                transform: rotate3d(.5, .3, .4, 5turn)
+            }
+        }
+        .linkdiv {
+            display: flex;
+            position: relative;
+            height: 10%;
+            margin: 5px 0 5px 0;
+            border: 1px solid #000;
+        }
+        input[type=checkbox] {
+            transform: scale(2);
+            margin: 10px 10px 0 10px;
+        }
+        input[type=button] {
+            position: absolute;
+            top: 0;
+            right: 0;
+        }
+        .linkdiv>input[type=button] {
+            width: 50%;
+            height: 100%;
+        }
+        .ddisplay {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+    </style>
+</head>
+
+<body id="body">
+    <!--./memo.txt-->
+    <div class="container"><audio id="DiceSound" controls preload="none">
+            <source src="diceAudio.mp3" type="audio/mp3">
+        </audio>
+        <div class="dices">
+            <div class="dicediv" id="diceabout">
+                <h3 class="dicehead">詳細と使い方</h3>
+                <input type="checkbox" checked class="ddisplay">
+                <div class="dicebody" style="text-align: start;"><a href="/">TOP</a>
+                    <a href="https://cthuwebdice.com/dice/" target="_blank">参考サイト</a>
+                    <p class="summary">[参考サイト]を参考にしてJavaScriptとSVGで作ったクトゥルフ神話|TRPGでダイスロールするときに使っている自作ダイスです。<br>ページの読み込みが速くなるように作りました。</p>
+                    <p>ダイスはベクター画像のSVGを使ってファイル容量を減らしました。<br>SVGとページファイルを一つにしてリクエスト数を少なくしたので速いです。</p>
+                    <p>ダイスの左上のチェックボックスのチェックを外すと隠すことができます。<br>ショートカットはそれぞれのダイスへ移動したりゴミ箱に移動できます。<br>ショートカットの上のバーを押すとフルスクリーンになります。<br>
+                        <picture>
+                            <source srcset="dice-PR.webp" type="image/webp">
+                            <img src="dice-PR.png" width="750" height="667" style="width:100%;max-width:500px;height:auto;" alt="使い方を説明した画像">
+                        </picture>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div style="position:fixed;bottom:0px;right:0px;"><b class="jslink" style="font-size:40px;"
+                onclick="ScrollWindow('body')">上</b></div>
+        <div id="javasparrowHTML" style="font-size:100px;position:fixed;width:100px;height:100px;"></div>
+    </div>
+    <script>
+var diceDiv = document.querySelector(".container > .dices");
+var svgDataURL = function(svg){return "data:image/svg+xml,"+encodeURIComponent(`<?xml version="1.0" standalone="no"?><svg viewBox="0, 0, 100, 100" version="1.1" xmlns="http://www.w3.org/2000/svg">${svg}</svg>`);};
+var svgMet = function(svg){return `<?xml version="1.0" standalone="no"?><svg viewBox="0, 0, 100, 100" version="1.1" xmlns="http://www.w3.org/2000/svg">${svg}</svg>`;};
+var svgBunntyou = function(svg){return "data:image/svg+xml,"+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="230" height="180">${svg}</svg>`);}
+var svgTemplate = {"4d":svgMet(`<polygon points="50,5 95,90 5,90" stroke="#d8d8d8" stroke-width="3" stroke-linejoin="round" fill="#fff"/><text x="50%" y="60%" text-anchor="middle" dominant-baseline="central" stroke="#000" stroke-width="3" font-size="300%" stroke-linejoin="round" font-family="monospace"><NUMBER></text>`),"10d":svgMet(`<polygon points="50,5 95,50, 50,95 5,50" stroke="#d8d8d8" stroke-width="3" stroke-linejoin="round" fill="#eee"/><polygon points="50,50 20,65 50,95" stroke="#d8d8d8" stroke-width="3" stroke-linejoin="round" fill="#eee"/><polygon points="50,50 80,65 50,95" stroke="#d8d8d8" stroke-width="3" stroke-linejoin="round" fill="#eee"/><polygon points="50,5 75,60 50,80 25,60" stroke="#d8d8d8" stroke-width="3" stroke-linejoin="round" fill="#fff"/><text x="50%" y="50%" text-anchor="middle" dominant-baseline="central" stroke="#000" stroke-width="3" font-size="250%" stroke-linejoin="round" font-family="monospace"><NUMBER></text>`),"20d":svgMet(`<polygon points="50,5 90,25 90,75 50,95 10,75 10,25" stroke="#d8d8d8" stroke-width="3" stroke-linejoin="round" fill="#eee"/><polygon points="50,5 90,75 10,75" stroke="#d8d8d8" stroke-width="3" stroke-linejoin="round" fill="#fff"/><text x="50%" y="50%" text-anchor="middle" dominant-baseline="central" stroke="#000" stroke-width="3" font-size="250%" stroke-linejoin="round" font-family="monospace"><NUMBER></text>`),"0xd":svgMet(`<polygon points="50,5 90,25 90,75 50,95 10,75 10,25" stroke="#d8d8d8" stroke-width="3" stroke-linejoin="round" fill="#eee"/><polygon points="50,5 90,75 10,75" stroke="#d8d8d8" stroke-width="3" stroke-linejoin="round" fill="#fff"/><text x="50%" y="50%" text-anchor="middle" dominant-baseline="central" stroke="#000" stroke-width="3" font-size="250%" stroke-linejoin="round" font-family="monospace"><NUMBER></text>`)};
+var svgFiles = {
+    "6d/dice.gif":svgDataURL(`<polygon points="5,5 95,5 95,95 5,95" stroke="#d8d8d8" stroke-width="3" stroke-linejoin="round" fill="#fff"/><text x="50%" y="50%" text-anchor="middle" dominant-baseline="central" stroke="#000" stroke-width="3" font-size="500%" stroke-linejoin="round" font-family="monospace">?</text>`),
+    "6d/1.gif":svgDataURL(`<polygon points="5,5 95,5 95,95 5,95" stroke="#d8d8d8" stroke-width="3" stroke-linejoin="round" fill="#fff"/><polygon points="50,27.5 35,74.5 72.5,44.5 27.5,44.5 65,74.5" fill="#0ff" transform="rotate(45)" transform-origin="center"/><circle cx="48" cy="52" r="6" fill="white"/>`),
+    "6d/2.gif":svgDataURL(`<polygon points="5,5 95,5 95,95 5,95" stroke="#d8d8d8" stroke-width="3" stroke-linejoin="round" fill="#fff"/><circle cx="35" cy="35" r="10" fill="blue"/><circle cx="70" cy="70" r="10" fill="blue"/>`),
+    "6d/3.gif":svgDataURL(`<polygon points="5,5 95,5 95,95 5,95" stroke="#d8d8d8" stroke-width="3" stroke-linejoin="round" fill="#fff"/><circle cx="25" cy="25" r="10" fill="green"/><circle cx="50" cy="50" r="10" fill="green"/><circle cx="75" cy="75" r="10" fill="green"/>`),
+    "6d/4.gif":svgDataURL(`<polygon points="5,5 95,5 95,95 5,95" stroke="#d8d8d8" stroke-width="3" stroke-linejoin="round" fill="#fff"/><circle cx="30" cy="30" r="10" fill="purple"/><circle cx="30" cy="70" r="10" fill="purple"/><circle cx="70" cy="30" r="10" fill="purple"/><circle cx="70" cy="70" r="10" fill="purple"/>`),
+    "6d/5.gif":svgDataURL(`<polygon points="5,5 95,5 95,95 5,95" stroke="#d8d8d8" stroke-width="3" stroke-linejoin="round" fill="#fff"/><circle cx="30" cy="30" r="10" fill="darkblue"/><circle cx="30" cy="70" r="10" fill="darkblue"/><circle cx="70" cy="30" r="10" fill="darkblue"/><circle cx="70" cy="70" r="10" fill="darkblue"/><circle cx="50" cy="50" r="10" fill="darkblue"/>`),
+    "6d/6.gif":svgDataURL(`<polygon points="5,5 95,5 95,95 5,95" stroke="#d8d8d8" stroke-width="3" stroke-linejoin="round" fill="#fff"/><circle cx="30" cy="25" r="10" fill="darkgreen"/><circle cx="70" cy="25" r="10" fill="darkgreen"/><circle cx="30" cy="50" r="10" fill="darkgreen"/><circle cx="70" cy="50" r="10" fill="darkgreen"/><circle cx="30" cy="75" r="10" fill="darkgreen"/><circle cx="70" cy="75" r="10" fill="darkgreen"/>`),
+    "javasparrow/dice.svg":svgBunntyou(`<path fill="#FFF" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 85c0-52 40-135 90-45 90 70 80 80 120 120-90 0-60 20-100 20-60 0-110-43-110-95Z"/><path d="M50 35c0-3 2-5 5-5s5 2 5 5-2 5-5 5-5-2-5-5Z"/><path fill="#F88" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M28 52 0 35l34-5-6 22Z"/><text x="40%" y="60%" text-anchor="middle" dominant-baseline="central" stroke="#000" stroke-width="3" font-size="500%" stroke-linejoin="round" font-family="monospace">?</text>`),
+    "javasparrow/1.svg":svgBunntyou(`<path fill="#C88" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 85c0-52 40-135 90-45 90 70 80 80 120 120-90 0-60 20-100 20-60 0-110-43-110-95Z"/><path fill="#F88" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M28 52 0 35l34-5-6 22Z"/><path fill="#844" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M35 26c0-9 15-26 32-26 18 0 34 17 34 26 14 9-17 6-35 6-17 0-33 4-31-6Z"/><path fill="#FFF" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M32 44c-4-20 6-11 37-11 21 0 41-8 40 11 0 10-18 18-39 18s-47-9-38-18Z"/><path d="M50 35c0-3 2-5 5-5s5 2 5 5-2 5-5 5-5-2-5-5Z"/>`),
+    "javasparrow/2.svg":svgBunntyou(`<defs><filter id="f1" filterUnits="userSpaceOnUse"><feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="5" seed="3" stitchTiles="stitch" result="noise"></feTurbulence><feColorMatrix in="noise" type="saturate" values="0" result="mono"></feColorMatrix><feComposite in="mono" in2="SourceGraphic" operator="in" result="res"/><feBlend in="res" in2="SourceGraphic" mode="darken"/></filter></defs><path filter="url(#f1)" fill="#fff" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 85c0-52 40-135 90-45 90 70 80 80 120 120-90 0-60 20-100 20-60 0-110-43-110-95Z"/><path fill="#F88" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M28 52 0 35l34-5-6 22Z"/><path fill="#FFF" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M32 44c-4-20 6-11 37-11 21 0 41-8 40 11 0 10-18 18-39 18s-47-9-38-18Z"/><path d="M50 35c0-3 2-5 5-5s5 2 5 5-2 5-5 5-5-2-5-5Z"/>`),
+    "javasparrow/3.svg":svgBunntyou(`<path fill="#888" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 85c0-52 40-135 90-45 90 70 80 80 120 120-90 0-60 20-100 20-60 0-110-43-110-95Z"/><path fill="#F88" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M28 52 0 35l34-5-6 22Z"/><path fill="#333" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M35 26c0-9 15-26 32-26 18 0 34 17 34 26 14 9-17 6-35 6-17 0-33 4-31-6Z"/><path fill="#FFF" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M32 44c-4-20 6-11 37-11 21 0 41-8 40 11 0 10-18 18-39 18s-47-9-38-18Z"/><path d="M50 35c0-3 2-5 5-5s5 2 5 5-2 5-5 5-5-2-5-5Z"/>`),
+    "javasparrow/4.svg":svgBunntyou(`<path fill="#FFF" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 85c0-52 40-135 90-45 90 70 80 80 120 120-90 0-60 20-100 20-60 0-110-43-110-95Z"/><path d="M50 35c0-3 2-5 5-5s5 2 5 5-2 5-5 5-5-2-5-5Z"/><path fill="#F88" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M28 52 0 35l34-5-6 22Z"/>`),
+    "javasparrow/5.svg":svgBunntyou(`<defs><filter id="f1" filterUnits="userSpaceOnUse"><feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="5" seed="3" stitchTiles="stitch" result="noise"></feTurbulence><feColorMatrix in="noise" type="saturate" values="0" result="mono"></feColorMatrix><feComposite in="mono" in2="SourceGraphic" operator="in" result="res"/><feBlend in="res" in2="SourceGraphic" mode="lighten"/></filter></defs><path filter="url(#f1)" fill="#888" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 85c0-52 40-135 90-45 90 70 80 80 120 120-90 0-60 20-100 20-60 0-110-43-110-95Z"/><path fill="#F88" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M28 52 0 35l34-5-6 22Z"/><path filter="url(#f1)" fill="#333" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M35 26c0-9 15-26 32-26 18 0 34 17 34 26 14 9-17 6-35 6-17 0-33 4-31-6Z"/><path fill="#FFF" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M32 44c-4-20 6-11 37-11 21 0 41-8 40 11 0 10-18 18-39 18s-47-9-38-18Z"/><path d="M50 35c0-3 2-5 5-5s5 2 5 5-2 5-5 5-5-2-5-5Z"/>`)
+};
+var diceSetting = [
+    {hide:0,    mode:2,    name:"javasparrow",     dice:["javasparrow/[1-5].svg","javasparrow/[1-5].svg","javasparrow/[1-5].svg","javasparrow/[1-5].svg","javasparrow/[1-5].svg","javasparrow/[1-5].svg"],ex:2},
+    {hide:0,    mode:2,    name:"1d3",     dice:["6d/[1-3].gif"]},
+    {hide:0,    mode:2,    name:"1d4",     dice:["4d/[1-4].svg"]},
+    {hide:1,    mode:2,    name:"1d6",     dice:["6d/[1-6].gif"]},
+    {hide:1,    mode:2,    name:"1d8",     dice:["10d/[1-8].svg"]},
+    {hide:0,    mode:2,    name:"1d10",    dice:["10d/[0-9].svg"]},
+    {hide:0,    mode:2,    name:"1d20",    dice:["20d/[1-20].svg"]},
+    {hide:0,    mode:1,    name:"1d50",    dice:["10d/[0-4].svg","10d/[0-9].svg"]},
+    {hide:0,    mode:1,    name:"1d100",   dice:["10d/[0-9].svg","10d/[0-9].svg"],ex:1},
+    {hide:0,    mode:2,    name:"2d3",     dice:["6d/[1-3].gif","6d/[1-3].gif"]},
+    {hide:0,    mode:2,    name:"2d6",     dice:["6d/[1-6].gif","6d/[1-6].gif"]},
+    {hide:0,    mode:2,    name:"3d3",     dice:["6d/[1-3].gif","6d/[1-3].gif","6d/[1-3].gif"]},
+    {hide:0,    mode:2,    name:"3d6",     dice:["6d/[1-6].gif","6d/[1-6].gif","6d/[1-6].gif"]},
+    {hide:1,    mode:3,    name:"3D3",     dice:["6d/[1-3].gif","6d/[1-3].gif","6d/[1-3].gif"]},
+    {hide:1,    mode:3,    name:"3D6",     dice:["6d/[1-6].gif","6d/[1-6].gif","6d/[1-6].gif"]},
+    {hide:1,    mode:2,    name:"5d6",     dice:["6d/[1-6].gif","6d/[1-6].gif","6d/[1-6].gif","6d/[1-6].gif","6d/[1-6].gif"]},
+    {hide:1,    mode:4,    name:"0xd2",    dice:["0xd/[0-15].svg","0xd/[0-15].svg"]},
+    {hide:1,    mode:4,    name:"0xd6",    dice:["0xd/[0-15].svg","0xd/[0-15].svg","0xd/[0-15].svg","0xd/[0-15].svg","0xd/[0-15].svg","0xd/[0-15].svg"]}
+];
+var Memobody = createDiceElement("ショートカット","memo");
+Memobody.style.textAlign = "start";
+Memobody.H.onclick = function(){document.documentElement.requestFullscreen()};
+
+var GOMIbody = createDiceElement("ゴミ箱","gomi");
+for(var i=0;i<diceSetting.length;i++){
+    var dboy = diceAdd(diceSetting[i]);
+    var link = linkAdd(diceSetting[i].name,diceSetting[i].name,diceSetting[i].hide);
+    if(diceSetting[i].ex == 2){
+        link.elm.del_f();
+        var javasparrow = document.getElementById("javasparrowHTML");
+        javasparrow.style.backgroundImage = "url("+svgFiles["javasparrow/3.svg"]+")";
+        javasparrow.style.display = "none";
+        dboy.V.oninput = function(e){
+            javasparrow.style.display = this.checked?"none":"block";
+        };
+        var oldxy = {top:0,left:0};
+        var newxy = {top:0,left:0};
+        var loop = function(){
+            oldxy = {top:newxy.top,left:newxy.left};
+            newxy = {top:Math.random()*(innerHeight-100),left:Math.random()*(innerWidth-100)};
+            for(var l=0;l<100;l++){
+                (function(p){setTimeout(function(){
+                    javasparrow.style.top = ( (oldxy.top*(1-p))+(newxy.top*p) )+"px";
+                    javasparrow.style.left = ( (oldxy.left*(1-p))+(newxy.left*p) )+"px";
+                },p*5000);})(l/100);
+            }
+        };
+        loop();
+        setInterval(loop,10000);
+    }
+};
+linkAdd("gomi","ゴミ箱",false);
+diceDiv.appendChild(GOMIbody.D);
+var Workbody = createDiceElement("職業","dicework");
+Workbody.style.textAlign = "start";
+var WorkData = document.createElement("p");
+var WorkNs = document.createElement("select");
+for(var i=1;i<6;i++){
+    var op = WorkNs.appendChild(document.createElement("option"));
+    op.value = i;
+    op.innerText = i+"人";
+}
+var Workduplication1 = document.createElement("label");
+Workduplication1.innerText = "重複あり";
+var Workdup1 = Workduplication1.appendChild(document.createElement("input"));
+
+var Workduplication2 = document.createElement("label");
+Workduplication2.innerText = "重複なし";
+var Workdup2 = Workduplication2.appendChild(document.createElement("input"));
+
+Workdup1.type="radio";Workdup2.type="radio";
+Workdup1.name="case";Workdup2.name="case";
+Workdup1.value="0";Workdup2.value="1";
+Workdup1.checked = true;
+
+var Workset = document.createElement("input");
+Workset.type = "button";
+Workset.value = "ランダム";
+Workset.onclick = function(){WorkData.innerHTML = WORKStext(WorkNs.value*1,Workdup1.checked);};
+Workbody.appendChild(WorkNs);
+Workbody.appendChild(document.createElement("br"));
+Workbody.appendChild(Workduplication1);
+Workbody.appendChild(Workduplication2);
+Workbody.appendChild(document.createElement("br"));
+Workbody.appendChild(WorkData);
+Workbody.appendChild(Workset);
+Workbody.appendChild(document.createElement("h5")).innerText = "脚本家:耐久3自分が判定に失敗した場合も\n修正内容が正しいものとして話を進める(耐久は減る)\n霊媒師:耐久4誰かが耐久が減る時代わりに\n自分の耐久を減らすことができる\n編集者:耐久3自分が判定に失敗した時\nGMはランダムにキーワードを1つ公表する\n科学者:耐久2一度の判定で同時に\n2つまで修正点を指摘できる\n呪術師:耐久6自分が判定に成功した時\n出た目の数字を選択しているPCの耐久を1減らす\n無職:耐久5あらゆるロールプレイ時\n皆からお前、むーしょくっ!といじられる";
+linkAdd("dicework","職業",true);
+var historybody = createDiceElement("履歴","dicehistory");
+linkAdd("dicehistory","履歴",true);
+function diceAdd(setting){
+    var imgs = [];
+    for(var j=0;j<setting.dice.length;j++){
+        var img = document.createElement("img");
+        img.src = FetchSVG(setting.dice[j].replace(/\[\d+-\d+\]/,"dice"));
+        Object.assign(img,{width:"90",height:"90"});
+        img.style.transformOrigin = "center center 0px";
+        imgs.push(img);
+    };
+    var result = document.createElement("p");
+    result.innerHTML = (setting.ex!=2)?"?":"";
+    result.className = "result";
+    var Ddiv = createDiceElement(setting.name,setting.name);
+    if(setting.mode==3)Ddiv.style.perspective = "30vw";
+    Ddiv.onclick = function(){
+        var rand;
+        function setRand(){
+            var rnd = 0;
+            rand = 0;
+            for(var j=0;j<imgs.length;j++){
+                var [,min,max] = /\[(\d+)-(\d+)\]/.exec(setting.dice[j]);
+                [max,min] = [max*1,min*1];
+                rnd = min + Math.floor(Math.random() * ((max+1)-min));
+                if(setting.mode==1){
+                    rand += rnd*Math.pow(10,(imgs.length-j-1));
+                }else if(setting.mode==2||setting.mode==3){
+                    rand += rnd;
+                }else if(setting.mode==4){
+                    rand += rnd*Math.pow(16,(imgs.length-j-1));
+                };
+                if(setting.mode==4){
+                    imgs[j].src = FetchSVG( setting.dice[j].replace(/\[\d+-\d+\]/,rnd.toString(16)) );
+                }else{
+                    imgs[j].src = FetchSVG( setting.dice[j].replace(/\[\d+-\d+\]/,rnd.toString()) );
+                };
+            };
+            [result.innerHTML,result.style.color] = ((rand>=96||rand==0)&&setting.ex==1)?[rand+"ファンブル","#F00"]:(rand<=5&&setting.ex==1)?[rand+"クリティカル","#FF0"]:(setting.ex!=2)?[rand,"#000"]:["","#000"];
+        };
+        DiceSound.currentTime = 0;
+        DiceSound.play();
+        var count = 15;
+        var intervalID = setInterval(function(){
+            if(count == 0){
+                if(setting.mode==3){
+                    imgs.map(e=>e.style.animation = "");
+                    result.style.animation= "";
+                };
+                historybody.innerHTML += new Date().toLocaleString()+"___"+setting.name+"___"+rand+"<br>";
+                clearInterval(intervalID);
+            }else if(count-- > 0){
+                setRand();
+                if(setting.mode==3){
+                    imgs.map(e=>e.style.animation = "rote 1.5s linear infinite");
+                    result.style.animation= "rote 1.5s linear infinite";
+                };
+            }
+        },100);
+    };
+    imgs.forEach(e=>Ddiv.appendChild(e));
+    Ddiv.appendChild(result);
+    return Ddiv;
+};
+function FetchSVG(path){
+    if(path in svgFiles) return svgFiles[path];
+    if(path.slice(-4) != ".svg") return "error";
+    var file = path.split("/")[0];
+    if(!(file in svgTemplate)) return "error";
+    var img = path.split("/")[1].replace(".svg","");
+    if(img=="dice")img="?";
+    return svgFiles[path]="data:image/svg+xml,"+encodeURIComponent( svgTemplate[file].replace("<NUMBER>",img) );
+};
+function ScrollWindow(elem){
+    var element = document.getElementById(elem);
+    var rect = element.getBoundingClientRect();
+    var elemtop = rect.top + window.pageYOffset;
+    document.documentElement.scrollTop = elemtop;
+};
+function WORKStext(num, dup){
+    function intRandom(min, max){return Math.floor(Math.random()*(max-min+1))+min;}
+    function randomArray(min, max, duplication){
+        var arr = [];var tmp;
+        if(duplication){for(var i=min;i<=max;i++) arr.push(intRandom(min, max));}else{for(var i=min;i<=max;i++)while(true){if(!arr.includes(tmp=intRandom(min, max))){arr.push(tmp);break;}};}
+        return arr;
+    };
+    var min = 1, max = num;
+    var numArr = randomArray(min, max, false);
+    var workArr = randomArray(0, 5,!!dup);
+    var kinds = ["脚本家","霊媒師","編集者","科学者","呪術師","無職"];
+    var text = "";
+    for(var i=min;i<=max;i++) text+=i+".数字"+numArr[i-1]+"職業："+kinds[workArr[i- 1]]+"<br>";
+    return text;
+};
+function linkAdd(id,linktext,hide){
+    var inGomi = false;
+    var linkDiv = document.createElement("div");
+    linkDiv.className = "linkdiv";
+    var link = document.createElement("b");
+    link.innerText = linktext;
+    link.onclick = function(){ScrollWindow(id);};
+    link.className = "jslink";
+    var linkdel = document.createElement("input");
+    linkdel.type = "button";
+    linkdel.value = linktext+"をゴミ箱に移動";
+    var callback = function(nowgomi){};
+    linkdel.onclick = function(){
+        if(inGomi){
+            document.getElementById(id).style.display = "block";
+            linkdel.value = linktext+"をゴミ箱に移動";
+            Memobody.appendChild(linkDiv);
+            inGomi = false;
+        }else{
+            document.getElementById(id).style.display = "none";
+            linkdel.value = linktext+"を復元する";
+            GOMIbody.appendChild(linkDiv);
+            inGomi = true;
+        };
+    };
+    linkDiv.appendChild(link);
+    if(id!="gomi")linkDiv.appendChild(linkdel);
+    Memobody.appendChild(linkDiv);
+    if(hide){
+        //setTimeout(function(){
+        document.getElementById(id).style.display = "none";
+        linkdel.value = linktext+"を復元する";
+        GOMIbody.appendChild(linkDiv);
+        inGomi = true;
+        //},100)
+    }
+    return {elm:{link,del_f:(function(){linkdel.remove()})}, funcs:{callback}};
+};
+function createDiceElement(headname,id){
+    var D = document.createElement("div");
+    D.className = "dicediv";
+    if(id)D.id=id;
+    var Dhead = document.createElement("h3");
+    Dhead.className = "dicehead";
+    Dhead.innerHTML = headname;
+    var Dbody = document.createElement("div");
+    Dbody.className = "dicebody";
+    var Ddisplay = document.createElement("input");
+    Ddisplay.className = "ddisplay";
+    Ddisplay.type = "checkbox";
+    Ddisplay.checked = true
+    Dbody.D = D;
+    Dbody.H = Dhead;
+    Dbody.V = Ddisplay;
+    D.appendChild(Dhead);
+    D.appendChild(Ddisplay);
+    D.appendChild(Dbody);
+    diceDiv.appendChild(D);
+    return Dbody;
+};
+</script>
+</body>
+
+</html>

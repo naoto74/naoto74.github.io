@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="description" content="GLSLでBZ反応(Belousov_Zhabotinsky_reaction)">
+  <title>GLSLでBZ反応 Belousov Zhabotinsky reaction</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/top.css">
+  <link rel="stylesheet" href="/css/preCode.css">
+</head>
+
+<body>
+  <div class="topBar">
+      <div class="goTop">
+          <a href="/">
+              <img src="/image/title.svg" alt="HTML,CSS,JavaScriptで作ったもの集" width="200" height="48" decoding="async">
+          </a>
+      </div>
+  </div>
+  <div class="mainContent">
+      <div class="contentTitle"><h1>BZ反応</h1></div>
+      <div class="contentBody">
+          <h2 class="URLtitle">JavaScriptとGLSLでBZ反応</h2>
+          <p class="summary">JavaScriptとGLSLを使ってBZ反応のシミュレーションをしてみました。<br>GLSLによる並列処理でかなり速い演算ができています。</p>
+          <p>
+            <a href="https://ja.wikipedia.org/wiki/%E3%83%99%E3%83%AD%E3%82%A6%E3%82%BD%E3%83%95%E3%83%BB%E3%82%B8%E3%83%A3%E3%83%9C%E3%83%81%E3%83%B3%E3%82%B9%E3%82%AD%E3%83%BC%E5%8F%8D%E5%BF%9C" target="_blank">ja.wikipedia.org/wiki/ベロウソフ・ジャボチンスキー反応</a>
+          </p>
+          <div class="viewBody">
+          <div id="viewFrame" class=".body">
+<div class="outputDiv">
+  <canvas id="canvas"></canvas>
+</div>
+<div class="detail">
+<p>
+これはJavaScriptとGLSLを使ったBZ反応の描画です。<br>
+上下左右は繋がってループしています。
+</p>
+</div>
+  <script id="vs1" type="shader">
+attribute vec3 aPosition;
+attribute vec2 aTextureCoordinate;
+varying vec2 vTextureCoordinate;
+varying float MAXHP;
+varying float Ptn;
+void main(){
+  MAXHP=float(100);
+  Ptn=float(3);
+  vTextureCoordinate=aTextureCoordinate;
+  gl_Position = vec4(aPosition,1.0);
+}
+</script>
+  <script id="fs1" type="shader">
+precision lowp float;
+uniform vec2 uOffset;
+varying vec2 vTextureCoordinate;
+varying float MAXHP;
+varying float Ptn;
+
+float random(vec2 st){
+  vec2 s = st;
+  s.x *= 10.0;
+  float a = dot(sin(s*32.1),cos(s*91.0));
+  s.y *= 10.0;
+  float b = dot(sin(s*63.3),cos(s*54.1));
+  s.x /= 20.0;
+  float c = dot(sin(s*26.3),cos(s*55.4));
+  s.y /= 20.0;
+  float d = dot(sin(s*54.2),cos(s*72.5));
+  vec2 e = vec2(a,b);
+  vec2 f = vec2(d,c);
+  return fract( dot( fract(e)  , fract(f) ) );
+}
+void main(){
+  float kind = float(floor(random((gl_FragCoord.xy+uOffset)/512.0)*Ptn));
+  float HP=MAXHP;
+  gl_FragColor=vec4(kind/Ptn,0.0,HP/MAXHP,1.0);
+}
+</script>
+  <script id="fs2" type="shader">
+precision lowp float;
+uniform sampler2D aTexture;
+uniform vec2 uResolution;
+varying vec2 vTextureCoordinate;
+varying float MAXHP;
+varying float Ptn;
+vec2 scale = 1.0 / uResolution;
+
+vec4 U(sampler2D t,vec2 s,int kx,int ky){
+  float x=float(kx);float y=float(ky);
+  return texture2D(t,mod((gl_FragCoord.xy+vec2(x,y))*s+10.0,1.0));
+}
+void main(){
+  vec4 my=U(aTexture,scale,0,0).rgba;
+  float kind=my.r*Ptn;
+  float HP=my.b*MAXHP;
+  int next=int(mod(kind+1.0,Ptn));
+  for(int w=1;w<=2;w++){
+    for(int y=-1;y<=1;y++){
+      for(int x=-1;x<=1;x++){
+        HP -= (int(U(aTexture,scale,x*w,y*w).r*Ptn)==next)?1.0:0.0;
+      }
+    }
+  }
+  kind=(HP<=1.0)?(((HP=MAXHP)==HP)?kind=mod(kind+1.0,Ptn):0.0):(kind);
+  gl_FragColor=vec4(kind/Ptn,0.0,HP/MAXHP,1.0);
+}
+</script>
+  <script id="fs3" type="shader">
+precision lowp float;
+uniform sampler2D aTexture;
+varying vec2 vTextureCoordinate;
+
+varying float MAXHP;
+varying float Ptn;
+
+vec3 hsv(float h,float s,float v){
+  vec4 t=vec4(1.0,2.0/3.0,1.0/3.0,3.0);
+  vec3 p=abs(fract(vec3(h)+t.xyz)*6.0-vec3(t.w));
+  return v*mix(vec3(t.x),clamp(p-vec3(t.x),0.0,1.0),s);
+}
+void main() {
+  vec4 c=texture2D(aTexture, vTextureCoordinate);
+  gl_FragColor = vec4(hsv(c.r,1.0,c.b),1.0);
+}
+</script>
+
+  <script type="module" data-file="main.js">
+    function createFrameBuffer(gl, width, height) {
+      const frameBuffer = gl.createFramebuffer();
+      const texture = gl.createTexture();
+
+      gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffer);
+
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, texture);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
+
+      gl.bindTexture(gl.TEXTURE_2D, null);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+      return {
+        frameBuffer: frameBuffer,
+        texture: texture
+      };
+    };
+    const canvas = document.getElementById('canvas');
+    const gl = canvas.getContext('webgl');
+    var cw = canvas.width = 512;
+    var ch = canvas.height = 512;
+
+    const vertexShader = gl.createShader(gl.VERTEX_SHADER);
+    gl.shaderSource(vertexShader, document.getElementById("vs1").text);
+    gl.compileShader(vertexShader);
+
+    const initializeShader = gl.createShader(gl.FRAGMENT_SHADER);
+    gl.shaderSource(initializeShader, document.getElementById("fs1").text);
+    gl.compileShader(initializeShader);
+
+    const updateShader = gl.createShader(gl.FRAGMENT_SHADER);
+    gl.shaderSource(updateShader, document.getElementById("fs2").text);
+    gl.compileShader(updateShader);
+
+    const renderShader = gl.createShader(gl.FRAGMENT_SHADER);
+    gl.shaderSource(renderShader, document.getElementById("fs3").text);
+    gl.compileShader(renderShader);
+
+
+
+
+    const initializeProgram = gl.createProgram();
+    gl.attachShader(initializeProgram, vertexShader);
+    gl.attachShader(initializeProgram, initializeShader);
+    gl.linkProgram(initializeProgram);
+
+
+    const updateProgram = gl.createProgram();
+    gl.attachShader(updateProgram, vertexShader);
+    gl.attachShader(updateProgram, updateShader);
+    gl.linkProgram(updateProgram);
+
+    
+    const renderProgram = gl.createProgram();
+    gl.attachShader(renderProgram, vertexShader);
+    gl.attachShader(renderProgram, renderShader);
+    gl.linkProgram(renderProgram);
+
+
+    const positionBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+      -1.0,  1.0, 0.0,
+      -1.0, -1.0, 0.0,
+       1.0,  1.0, 0.0,
+       1.0, -1.0, 0.0
+    ]), gl.STATIC_DRAW);
+    gl.bindBuffer(gl.ARRAY_BUFFER, null);
+    
+    const texCoordBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+      0.0, 1.0,
+      0.0, 0.0,
+      1.0, 1.0,
+      1.0, 0.0
+    ]), gl.STATIC_DRAW);
+    gl.bindBuffer(gl.ARRAY_BUFFER, null);
+    
+
+    var prevFrameBufferObj = createFrameBuffer(gl, cw, ch);
+    var nextFrameBufferObj = createFrameBuffer(gl, cw, ch);
+    
+    // init
+    gl.useProgram(initializeProgram);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, prevFrameBufferObj.frameBuffer);
+    gl.viewport(0, 0, cw, ch);
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    gl.enableVertexAttribArray(gl.getAttribLocation(initializeProgram, 'aPosition'));
+    gl.vertexAttribPointer(gl.getAttribLocation(initializeProgram, 'aPosition'), 3, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+    gl.uniform2fv(gl.getUniformLocation(initializeProgram, 'uOffset'), [Math.random() * cw, Math.random() * ch]);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    gl.flush();
+
+
+    function loop(){
+      //update
+      gl.useProgram(updateProgram);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, nextFrameBufferObj.frameBuffer);
+      gl.viewport(0, 0, cw, ch);
+      gl.clearColor(0.0, 0.0, 0.0, 1.0);
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, prevFrameBufferObj.texture);
+      
+      gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+      gl.enableVertexAttribArray(gl.getAttribLocation(initializeProgram, 'aPosition'));
+      gl.vertexAttribPointer(gl.getAttribLocation(initializeProgram, 'aPosition'), 3, gl.FLOAT, false, 0, 0);
+      gl.bindBuffer(gl.ARRAY_BUFFER, null);
+        
+
+      gl.uniform1i(gl.getUniformLocation(updateProgram, 'uTexture'), 0);
+      gl.uniform2fv(gl.getUniformLocation(updateProgram, 'uResolution'), [cw, ch]);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      gl.flush();
+
+      //render
+      gl.useProgram(renderProgram);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+      gl.viewport(0, 0, cw, ch);
+      gl.clearColor(0.0, 0.0, 0.0, 1.0);
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, nextFrameBufferObj.texture);
+
+      
+      gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+      gl.enableVertexAttribArray(gl.getAttribLocation(initializeProgram, 'aPosition'));
+      gl.vertexAttribPointer(gl.getAttribLocation(initializeProgram, 'aPosition'), 3, gl.FLOAT, false, 0, 0);
+      gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+      gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
+      gl.enableVertexAttribArray(gl.getAttribLocation(renderProgram, 'aTextureCoordinate'));
+      gl.vertexAttribPointer(gl.getAttribLocation(renderProgram, 'aTextureCoordinate'), 2, gl.FLOAT, false, 0, 0);
+      gl.bindBuffer(gl.ARRAY_BUFFER, null);
+      
+
+      gl.uniform1i(gl.getUniformLocation(updateProgram, 'uTexture'), 0);
+      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      gl.flush();
+
+      var tmp = prevFrameBufferObj;
+      prevFrameBufferObj = nextFrameBufferObj;
+      nextFrameBufferObj = tmp;
+      requestAnimationFrame(loop);
+    };
+    requestAnimationFrame(loop);
+  </script>
+  <style data-file="style.css">
+    @media (max-width: 800px){
+      .mainContent #canvas{
+        width:100%;
+      }
+    }
+    </style>
+  </div>
+  <script src="/js/preCode.js" defer></script>
+  </div>
+      </div>
+  </div>
+</body>
+
+</html>

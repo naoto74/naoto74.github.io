@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="JavaScriptで棒人間を動かす。">
+    <title>JavaScriptとcanvasで棒人間のアニメーション</title>
+
+    <link rel="stylesheet" href="/css/top.css">
+    <link rel="stylesheet" href="/css/preCode.css">
+</head>
+<body>
+    <div class="topBar">
+        <div class="goTop">
+            <a href="/">
+                <img src="/image/title.svg" alt="HTML,CSS,JavaScriptで作ったもの集" width="200" height="48" decoding="async">
+            </a>
+        </div>
+    </div>
+    <div class="mainContent">
+        <div class="contentTitle"><h1>棒人間</h1></div>
+        <div class="contentBody">
+            <h2 class="URLtitle">JavaScriptで棒人間を描画</h2>
+            <p class="summary">JavaScriptで棒人間を描画しました。<br>この棒人間を前に作った横スクロールのプレイヤーにすれば<br>いいゲームになりそうです。</p>
+            <a href="../scroll-game/">横スクロール</a>
+            <div class="viewBody">
+            <div id="viewFrame" class=".body">
+<div class="outputDiv">
+	<canvas id="canvas" width="300" height="300"></canvas>
+	<p><span id="fps">0</span>fps</p>
+</div>
+<div class="detail">
+	<p>
+	これはJavaScriptを使った棒人間の描画です。
+	</p>
+</div>
+<script type="module" data-file="main.js">
+var output = document.getElementById("fps");
+var canvas = document.getElementById("canvas");
+var context = canvas.getContext("2d");
+canvas.style.border = "1px solid #000";
+var cw = canvas.width;
+var ch = canvas.height;
+var cw2 = cw/2;
+var ch2 = ch/2;
+var fpscount = 0;
+var fps = 0;
+var rad = 3.14/180;
+class Stickman{
+	constructor(x,y,width){
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = 90/50*width;
+        this.time = 0;
+        this.color = "#000";
+        this.speed = 3;
+        this.linewidth = 2;
+    }
+    draw(context){
+        this.height = 90/50*this.width;
+        context.strokeStyle = this.color;
+        context.lineWidth = this.linewidth;
+        var animationTime = -this.time/20;
+        
+        var AngleF = (defaultAngle,angle,length)=>defaultAngle+(Math.sin(animationTime+angle*rad)+1.0)*length;
+        var SizeF = size => size/50*this.width;
+        var headR = SizeF(10);
+        var bodyAngle = 100;
+        var armRightAngle = AngleF(90,0,20);
+        var armRightAngle2 = AngleF(-30,0,80);
+        var armLeftAngle =  AngleF(90,180,20);
+        var armLeftAngle2 = AngleF(-30,180,80);
+        var legRightAngle = AngleF(20,0,50);
+        var legRightngle2 = AngleF(80,70,50);
+        var legLeftAngle = AngleF(20,180,50);
+        var legLeftAngle2 = AngleF(80,250,50);
+
+
+        var headX = this.x+this.width/2;
+        var headY = this.y+headR + Math.sin(this.time/10)+SizeF(5.0);
+        var neckLineX = headX;
+        var neckLineY = headY + SizeF(15);
+
+        var armRightX = neckLineX+Math.cos(armRightAngle*rad)*SizeF(20);
+        var armRightY = neckLineY+Math.sin(armRightAngle*rad)*SizeF(20);
+
+        var armRight2X = armRightX+Math.cos(armRightAngle2*rad)*SizeF(10);
+        var armRight2Y = armRightY+Math.sin(armRightAngle2*rad)*SizeF(10);
+
+        var armLeftX = neckLineX+Math.cos(armLeftAngle*rad)*SizeF(20);
+        var armLeftY = neckLineY+Math.sin(armLeftAngle*rad)*SizeF(20);
+
+        var armLeft2X = armLeftX+Math.cos(armLeftAngle2*rad)*SizeF(10);
+        var armLeft2Y = armLeftY+Math.sin(armLeftAngle2*rad)*SizeF(10);
+
+        var bodyX = neckLineX+Math.cos(bodyAngle*rad)*SizeF(30);
+        var bodyY = neckLineY+Math.sin(bodyAngle*rad)*SizeF(30);
+
+        var legRightX = bodyX+Math.cos(legRightAngle*rad)*SizeF(15);
+        var legRightY = bodyY+Math.sin(legRightAngle*rad)*SizeF(15);
+
+        var legRight2X = legRightX+Math.cos(legRightngle2*rad)*SizeF(15);
+        var legRight2Y = legRightY+Math.sin(legRightngle2*rad)*SizeF(15);
+
+        var legLeftX = bodyX+Math.cos(legLeftAngle*rad)*SizeF(15);
+        var legLeftY = bodyY+Math.sin(legLeftAngle*rad)*SizeF(15);
+
+        var legLeft2X = legLeftX+Math.cos(legLeftAngle2*rad)*SizeF(15);
+        var legLeft2Y = legLeftY+Math.sin(legLeftAngle2*rad)*SizeF(15);
+
+        
+        /*context.beginPath();
+        context.strokeRect(this.x,this.y,this.width,this.height);
+        context.stroke();*/
+        
+        context.beginPath();
+        context.arc(headX, headY, headR, 0, 6.28);
+        context.stroke();
+
+        context.beginPath();
+
+        context.moveTo(headX, headY);
+        context.lineTo(neckLineX, neckLineY);
+
+        context.moveTo(neckLineX, neckLineY);
+        context.lineTo(armRightX, armRightY);
+        context.lineTo(armRight2X, armRight2Y);
+
+        context.moveTo(neckLineX, neckLineY);
+        context.lineTo(armLeftX, armLeftY);
+        context.lineTo(armLeft2X, armLeft2Y);
+        
+        context.moveTo(neckLineX, neckLineY);
+        context.lineTo(bodyX, bodyY);
+        context.lineTo(legRightX, legRightY);
+        context.lineTo(legRight2X, legRight2Y);
+        context.moveTo(bodyX, bodyY);
+        context.lineTo(legLeftX, legLeftY);
+        context.lineTo(legLeft2X, legLeft2Y);
+
+        context.stroke();
+        context.save();
+        context.globalCompositeOperation = "destination-out";
+        context.beginPath();
+        context.arc(headX, headY, headR, 0, 6.28);
+        context.fill();
+        context.restore();
+        this.time+=this.speed;
+    }
+    static widthToheight(width){
+        return 90/50*width;
+    }
+}
+var stickmanArr = [];
+var stickHeight = Stickman.widthToheight(30);
+for(var y=0;y<6;y++){
+    for(var x=0;x<10;x++){
+        stickmanArr[x+y*10] = new Stickman(x*30,y*stickHeight,30);
+        stickmanArr[x+y*10].time = (x+y*10)*100;
+        stickmanArr[x+y*10].color = `hsl(${(x+y*10)*100},100%,50%)`;
+        stickmanArr[x+y*10].linewidth = (Math.random()*5)|0;
+        stickmanArr[x+y*10].speed = (Math.random()*10)|0+1;
+    }
+}
+function loop(){
+    context.clearRect(0,0,cw,ch);
+    stickmanArr.forEach(e=>e.draw(context));
+    fpscount++;
+    requestAnimationFrame(loop);
+}
+setInterval(function(){
+    output.innerText = fps = fpscount;fpscount = 0;
+},1000);
+loop();
+</script>
+<style data-file="style.css">
+.body{
+	width:100%;
+	height:100%;
+	display:flex;
+	flex-direction: row;
+}
+.body #canvas{
+	width:500px;
+}
+@media (max-width: 800px){
+	.mainContent{
+		flex-direction: column;
+	}
+	.mainContent #canvas{
+		width:100%;
+	}
+}
+.outputDiv{
+	flex:1;
+}
+.detail{
+	width:200px;
+}
+</style>
+            </div>
+            <script src="/js/preCode.js" defer></script>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

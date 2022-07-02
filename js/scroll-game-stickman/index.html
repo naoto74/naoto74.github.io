@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="JavaScriptとcanvasで横スクロールのスマホ対応ゲーム。">
+    <title>JavaScriptとcanvasで自作 横スクロールゲーム(棒人間)</title>
+    <!--スーパーマリオとマインクラフトをミキサーにかけて必要な部分を捨てたような横スクロールゲーム(棒人間)-->
+    <link rel="stylesheet" href="/css/top.css">
+</head>
+<body>
+    <style>
+        ::-webkit-scrollbar{
+            display: none;
+        }
+        *{margin:0;padding:0;}
+        .gameWindow{
+            /* 必要 */
+            user-select:none;
+            display:flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        canvas, .smartPhoneKeyBoard{
+            border: 1px solid #000;
+            width:min(95vw,95vh);
+        }
+        .smartPhoneKeyBoard,.smartPhoneKeyBoard td{
+            text-align: center;
+            border-collapse: collapse;
+        }
+        .smartPhoneKeyBoard td{
+            border: 1px solid #000;
+            height: 50px;
+        }
+    </style>
+    <div class="topBar">
+        <div class="goTop">
+            <a href="/">
+                <img src="/image/title.svg" alt="HTML,CSS,JavaScriptで作ったもの集" width="200" height="48" decoding="async">
+            </a>
+        </div>
+    </div>
+    <div class="gameWindow" oncontextmenu="return false;"><!-- 必要 -->
+        <canvas id="canvas" width="500" height="500"></canvas>
+        <table class="smartPhoneKeyBoard">
+            <tbody>
+                <tr>
+                    <td>&nbsp;</td>
+                    <td class="keyW">W</td>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <td class="keyA">A</td>
+                    <td>&nbsp;</td>
+                    <td class="keyD">D</td>
+                </tr>
+                <tr>
+                    <td>&nbsp;</td>
+                    <td class="keyS">S</td>
+                    <td>&nbsp;</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <p class="summary">棒人間と横スクロールを足して作りました。前よりゲームに見えます。</p>
+    <a href="../scroll-game/">横スクロール</a>
+    <a href="../stickman/">棒人間</a>
+    <a href="/">TOP</a>
+    <script src="main.js" defer></script>
+</body>
+</html>

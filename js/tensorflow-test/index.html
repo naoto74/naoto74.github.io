@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="TensorFlowを使ってcanvasに書いた手書き数字を読み取ってみた。">
+    <title>手書き数字を読み取るAI(TensorFlow)</title>
+
+    <link rel="stylesheet" href="/css/top.css">
+    <link rel="stylesheet" href="/css/preCode.css">
+</head>
+<body>
+    <div class="topBar">
+        <div class="goTop">
+            <a href="/">
+                <img src="/image/title.svg" alt="HTML,CSS,JavaScriptで作ったもの集" width="200" height="48" decoding="async">
+            </a>
+        </div>
+    </div>
+    <div class="mainContent">
+        <div class="contentTitle"><h1>TensorFlow.js</h1></div>
+        <p class="summary">TensorFlow.jsを使って数字を読み取ってみました。<br>学習するときのプログラムは参考にしたサイトのそのままです。</p>
+        <a href="https://qiita.com/everylittle/items/519797589b9760d4bff0" target="_blank">参考にしたサイト</a>
+        <div class="contentBody">
+            <h2 class="URLtitle">TensorFlow.jsを使って数字を読み取る</h2>
+            <div class="viewBody">
+            <div id="viewFrame" class=".body">
+<div class="outputDiv">
+	<canvas id="canvas" width="300" height="300"></canvas>
+    <input type="button" value="モデルをロード" id="loadModel">
+    <input type="button" value="読み取る" disabled id="runModel">
+    <input type="button" value="消す" id="clearButton">
+    <div>出力:<span id="outputText"></span></div>
+</div>
+<div class="detail">
+	<p>
+	これはTensorFlow.jsを数字の読み取りです。
+	</p>
+</div>
+<script type="module" data-file="main.js">
+var loadModel = document.getElementById("loadModel");
+var runModel = document.getElementById("runModel");
+var clearButton = document.getElementById("clearButton");
+var outputText = document.getElementById("outputText");
+
+var canvas = document.getElementById("canvas");
+var context = canvas.getContext("2d");
+canvas.style.border = "1px solid #000";
+var cw = canvas.width;
+var ch = canvas.height;
+var cw2 = cw/2;
+var ch2 = ch/2;
+var model;
+var drag = false;
+var mousePosLast;
+var tfjssrc = "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js";
+function clear(){
+    canvas.width = cw;
+    canvas.height = ch;
+    context.strokeStyle = "#fff";
+    context.lineWidth = 30;
+    context.lineCap = "round";
+    context.fillStyle = "#000";
+    context.fillRect(0,0,cw,ch);
+};
+function Test(){
+    //28x28にする
+    var tmpCanvas = document.createElement("canvas");
+    tmpCanvas.width = 28;
+    tmpCanvas.height = 28;
+    var tmpContext = tmpCanvas.getContext("2d");
+    tmpContext.drawImage(canvas, 0, 0, 28, 28);
+    const image_data28 = tmpContext.getImageData(0, 0, 28,28);
+
+    const x = tf.tensor1d(new Float32Array(image_data28.data)).gather(tf.range(0, 28*28*4, 4, 'int32')).div(tf.scalar(255)).reshape([1, 28, 28, 1]);
+    const y = model.predict(x);
+    outputText.innerText = y.reshape([-1]).argMax().arraySync();
+};
+function toPos(e){
+    return [e.clientX-canvas.getBoundingClientRect().left,e.clientY-canvas.getBoundingClientRect().top];
+};
+function stroke(mousePos){
+    if(drag){
+        context.moveTo(mousePosLast[0], mousePosLast[1]);
+        context.lineTo(mousePos[0], mousePos[1]);
+        context.stroke();
+        mousePosLast = mousePos;
+    };
+};
+canvas.addEventListener("mousedown",function(e){
+    drag = true;
+    mousePosLast = toPos(e);
+},{passive:true});
+canvas.addEventListener("mousemove",function(e){
+    stroke(toPos(e));
+},{passive:true});
+canvas.addEventListener("mouseup",function(e){
+    drag = false;
+    stroke(toPos(e));
+},{passive:true});
+canvas.addEventListener("touchstart",function(e){
+    drag = true;
+    mousePosLast = toPos(e.changedTouches[0]);
+},{passive:true});
+canvas.addEventListener("touchmove",function(e){
+    e.preventDefault();
+    stroke(toPos(e.changedTouches[0]));
+},{passive:false});
+canvas.addEventListener("touchend",function(e){
+    drag = false;
+    stroke(toPos(e.changedTouches[0]));
+},{passive:true});
+async function loadStart(){
+    outputText.innerText = "ロード中";
+    loadModel.disabled = true;
+    await (new Promise(e=>{
+        var tfjsScript = document.createElement("script");
+        tfjsScript.onload = ()=>e();
+        tfjsScript.src = tfjssrc;
+        document.body.appendChild(tfjsScript);
+    }));
+    model = await tf.loadLayersModel("tfjs_model/model.json");
+    outputText.innerText = "ロード完了";
+    loadModel.value = "ロード済み";
+    runModel.disabled = false;
+    runModel.onclick = function(){
+        Test();
+    };
+    clearButton.onclick = function(){
+        clear();
+    };
+    clear();
+}
+loadModel.onclick = function(){
+    loadStart();
+    this.onclick = function(){};
+};
+</script>
+            </div>
+            <script src="/js/preCode.js" defer></script>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

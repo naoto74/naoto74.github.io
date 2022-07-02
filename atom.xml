@@ -1,0 +1,88 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>JavaScriptで作った趣味の作品</title>
+  <id>https://naoto74.github.io/</id>
+  <author>
+    <name>naoto</name>
+  </author>
+  <link rel="alternate" type="text/html" href="https://naoto74.github.io/" />
+  <self type="application/atom+xml" href="https://naoto74.github.io/atom.xml" />
+  <updated>2022-07-02T12:32:56+09:00</updated>
+  <entry>
+    <title>手書き数字を読み取るAI(TensorFlow)</title>
+    <updated>2022-07-02T12:30:17+09:00</updated>
+    <id>https://naoto74.github.io/js/tensorflow-test/</id>
+    <link rel="alternate" type="text/html" href="https://naoto74.github.io/js/tensorflow-test/" />
+    <summary>TensorFlow.jsを使って数字を読み取ってみました。学習するときのプログラムは参考にしたサイトのそのままです。</summary>
+  </entry>
+  <entry>
+    <title>JavaScriptとcanvasで棒人間のアニメーション</title>
+    <updated>2022-07-02T12:30:06+09:00</updated>
+    <id>https://naoto74.github.io/js/stickman/</id>
+    <link rel="alternate" type="text/html" href="https://naoto74.github.io/js/stickman/" />
+    <summary>JavaScriptで棒人間を描画しました。この棒人間を前に作った横スクロールのプレイヤーにすればいいゲームになりそうです。</summary>
+  </entry>
+  <entry>
+    <title>JavaScriptとcanvasで自作 横スクロールゲーム(棒人間)</title>
+    <updated>2022-07-02T12:29:56+09:00</updated>
+    <id>https://naoto74.github.io/js/scroll-game-stickman/</id>
+    <link rel="alternate" type="text/html" href="https://naoto74.github.io/js/scroll-game-stickman/" />
+    <summary>棒人間と横スクロールを足して作りました。前よりゲームに見えます。</summary>
+  </entry>
+  <entry>
+    <title>JavaScriptとcanvasで自作 横スクロールゲーム</title>
+    <updated>2022-07-02T12:29:47+09:00</updated>
+    <id>https://naoto74.github.io/js/scroll-game/</id>
+    <link rel="alternate" type="text/html" href="https://naoto74.github.io/js/scroll-game/" />
+    <summary>自作の横スクロールを作りました。プレイヤーを黄色い四角から棒人間に変えて別の場所で公開予定。</summary>
+  </entry>
+  <entry>
+    <title>JavaScriptとSVGでルーレット</title>
+    <updated>2022-07-02T12:29:32+09:00</updated>
+    <id>https://naoto74.github.io/js/roulette/</id>
+    <link rel="alternate" type="text/html" href="https://naoto74.github.io/js/roulette/" />
+    <summary>JavaScriptを使ってルーレットを作ってみました。</summary>
+  </entry>
+  <entry>
+    <title>JavaScriptとcanvasでメビウス変換</title>
+    <updated>2022-07-02T12:29:21+09:00</updated>
+    <id>https://naoto74.github.io/js/Mobius/</id>
+    <link rel="alternate" type="text/html" href="https://naoto74.github.io/js/Mobius/" />
+    <summary>JavaScriptでメビウス変換az+b / cz+dを複素数で計算して描画。不思議な変換です。</summary>
+  </entry>
+  <entry>
+    <title>GLSLでマンデルブロ集合 Mandelbrot set</title>
+    <updated>2022-07-02T12:29:07+09:00</updated>
+    <id>https://naoto74.github.io/js/Mandelbrot-set/</id>
+    <link rel="alternate" type="text/html" href="https://naoto74.github.io/js/Mandelbrot-set/" />
+    <summary>JavaScriptとGLSLを使ってマンデルブロ集合を計算してみました。GLSLによる並列処理でCPUよりあまりカクカクしていません。</summary>
+  </entry>
+  <entry>
+    <title>JavaScriptとcanvasで等角図</title>
+    <updated>2022-07-02T12:28:51+09:00</updated>
+    <id>https://naoto74.github.io/js/Isometric-view/</id>
+    <link rel="alternate" type="text/html" href="https://naoto74.github.io/js/Isometric-view/" />
+    <summary>JavaScriptを使って等角図を描画しました。立方体のかどだけしか描画してないのでしょぼいです。</summary>
+  </entry>
+  <entry>
+    <title>GLSLでBZ反応 Belousov Zhabotinsky reaction</title>
+    <updated>2022-07-02T12:27:37+09:00</updated>
+    <id>https://naoto74.github.io/js/Belousov-Zhabotinsky-reaction/</id>
+    <link rel="alternate" type="text/html" href="https://naoto74.github.io/js/Belousov-Zhabotinsky-reaction/" />
+    <summary>JavaScriptとGLSLを使ってBZ反応のシミュレーションをしてみました。GLSLによる並列処理でかなり速い演算ができています。</summary>
+  </entry>
+  <entry>
+    <title>JavaScriptで作った趣味の作品 TOP</title>
+    <updated>2022-07-02T12:23:21+09:00</updated>
+    <id>https://naoto74.github.io/</id>
+    <link rel="alternate" type="text/html" href="https://naoto74.github.io/" />
+    <summary>このサイトではJavaScriptで作ったツール、数学、アートに関するプログラムをSVGやHTMLのcanvasやGLSLを使いそれを公開しています。</summary>
+  </entry>
+  <entry>
+    <title>クトゥルフ神話|TRPG ダイスロールツール</title>
+    <updated>2022-06-19T00:54:21+09:00</updated>
+    <id>https://naoto74.github.io/js/dice/</id>
+    <link rel="alternate" type="text/html" href="https://naoto74.github.io/js/dice/" />
+    <summary>[参考サイト]を参考にしてJavaScriptとSVGで作ったクトゥルフ神話|TRPGでダイスロールするときに使っている自作ダイスです。ページの読み込みが速くなるように作りました。</summary>
+  </entry>
+</feed>
