@@ -8,7 +8,7 @@ for(var i=0;i<Codetarget.length;i++){
     }
     if(ex=="html"){
         if(Codetarget[i].TagName!="script"&&Codetarget[i].TagName!="style"){
-            srcHTML += Codetarget[i].outerHTML;
+            srcHTML += Codetarget[i].outerHTML+"\n";
         }
     }else{
         var pre = document.createElement("pre");
@@ -23,7 +23,7 @@ for(var i=0;i<Codetarget.length;i++){
 var pre = document.createElement("pre");
 var code = document.createElement("code");
 pre.dataset.lang="html";
-pre.dataset.file="index.html";
+pre.dataset.file="index.html (一部)";
 code.innerText = srcHTML;
 pre.appendChild(code);
 document.querySelector(".contentBody").insertAdjacentElement("beforeend",pre);
