@@ -26,8 +26,16 @@
             <div class="viewBody">
             <div id="viewFrame" class=".body">
 <div class="outputDiv">
-	<canvas id="canvas" width="300" height="300"></canvas>
-	<p><span id="fps">0</span>fps</p>
+	<canvas id="canvas" width="500" height="500"></canvas>
+    <div class="subontainer">
+        <div class="subItem">
+            <input type="checkbox" id="checkrotate">
+            <label for="checkrotate">回転</label>
+        </div>
+        <div class="subItem">
+            <p><span id="fps">0</span>fps</p>
+        </div>
+    </div>
 </div>
 <div class="detail">
 	<p>
@@ -36,6 +44,7 @@
 </div>
 <script type="module" data-file="main.js">
 var output = document.getElementById("fps");
+var checkrotate = document.getElementById("checkrotate");
 var canvas = document.getElementById("canvas");
 var context = canvas.getContext("2d");
 canvas.style.border = "1px solid #000";
@@ -46,13 +55,15 @@ var ch2 = ch/2;
 var fpscount = 0;
 var fps = 0;
 var rad = 3.14/180;
+var time = 0;
+checkrotate.onchange=function(){
+    if(!checkrotate.checked){//falseになった
+        time = 0;
+    };
+};
 /*
-インデックスを二進数にしてある。
-000 -> 0
-001 -> 1
-010 -> 2
-011 -> 3
-100 -> 4
+    [xyz]
+
            [001]ZZZZZZZZZZZZZZZZZZ[101]
          Z   |                       Z
        Z     |                     Z |
@@ -106,7 +117,14 @@ var polygon = [
 function loop(){
     context.clearRect(0,0,cw,ch);
     for(var i=0;i<polygon.length;i++){
-        var tmp = polygon[i].map(e=>position[e].to2d(cw/3));
+        if(checkrotate.checked) time+=0.3;
+        var tmp = polygon[i].map(e=>{
+            var pos1 = position[e];
+            if(checkrotate.checked){
+                pos1 = pos1.sub(new pos(0.5, 0.5, 0.5)).rotez(rad*time).add(new pos(0.5, 0.5, 0.5));
+            };
+            return pos1.to2d(cw/3);
+        });
         context.strokeStyle = `hsl(${i/polygon.length*360},100%,50%)`;
 	    context.beginPath();
         context.moveTo(tmp[0].x+cw2, tmp[0].y+ch2, 3, 0, 6.28);
@@ -116,9 +134,6 @@ function loop(){
 	    context.closePath();
         context.stroke();
     }
-    /*for(var i=0;i<position.length;i++){
-        position[i] = position[i].sub(new pos(0.5, 0.5, 0.5)).rotez(rad).add(new pos(0.5, 0.5, 0.5)); 
-    }*/
     fpscount++;
     requestAnimationFrame(loop);
 }
@@ -167,8 +182,15 @@ loop();
 .body #canvas{
 	width:500px;
 }
+.subontainer{
+    display:flex;
+    align-items: center;
+}
 @media (max-width: 800px){
-	.mainContent{
+    .subontainer{
+        justify-content: center;
+    }
+    .mainContent{
 		flex-direction: column;
 	}
 	.mainContent #canvas{
@@ -177,6 +199,15 @@ loop();
 }
 .outputDiv{
 	flex:1;
+}
+#checkrotate{
+    width: 25px;
+    height: 25px;
+    vertical-align: middle;
+    margin: 0 5px 0 0;
+}
+.subItem{
+    margin:5px 20px 0px 20px;
 }
 .detail{
 	width:200px;
