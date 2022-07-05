@@ -2,7 +2,8 @@ body{
     font-weight: 400;
     font-size: 100%;
     margin: 0;padding: 0;
-    background-color: #f5f6f6
+    background-color: #f5f6f6;
+    font-family:'メイリオ', 'Meiryo','ＭＳ ゴシック','Hiragino Kaku Gothic ProN','ヒラギノ角ゴ ProN W3',sans-serif;
 }
 body a{
     text-decoration: none;
