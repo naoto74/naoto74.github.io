@@ -7,11 +7,11 @@
 <title>TRPG|クトゥルフ神話に使えるダイスロールサイト</title>
 <link rel="stylesheet" type="text/css" href="main.css">
 </head>
-<body>
+<body style="margin:0;font-family:'メイリオ','Meiryo','ＭＳ ゴシック','Hiragino Kaku Gothic ProN','ヒラギノ角ゴ ProN W3',sans-serif;">
 <audio id="DiceSound" preload="none" style="display:none;"><source src="diceAudio.mp3" type="audio/mp3"></audio>
 <div id="container">
 <div class="diceItem" style="grid-column:1 / -1;font-size:1rem;"><div class="diceTitle">詳細と使い方</div><div class="diceBody"><p>クトゥルフ神話でダイスロールするときに自分で作ったダイスのサイトなら面白いので作りました。<br>作っている間CSSのGrid Layoutが勉強になりました。<br>参考にしたサイト<br><a href="http://qiita.com/kura07/items/e633b35e33e43240d363">CSS Grid Layout を極める！（基礎編）</a><br><a href="http://qiita.com/kura07/items/486c19045aab8090d6d9" id="reference-467a36eae4ed433e4fc1">CSS Grid Layout を極める！（場面別編）</a><br><br>1d100,1d50で0が出た場合それぞれ100,50になります。</p></div></div>
-<div class="diceItem settings" style="grid-column:1 / -1;font-size:1rem;"><div class="diceTitle">設定</div><div class="diceBody settingBody"><div class="colorset"><label for="colorHInput">色相</label><input type="range" id="colorHInput" min="0" max="360"></div><div class="colorset"><label for="colorSInput">彩度</label><input type="range" id="colorSInput" min="0" max="100"></div><div class="colorset"><label for="colorLInput">輝度</label><input type="range" id="colorLInput" min="0" max="100"></div></div></div>
+<div class="diceItem settings" style="grid-column:1 / -1;font-size:1rem;"><div class="diceTitle">設定</div><div class="diceBody settingBody"><div class="colorset"><label for="colorHInput">色相</label><input type="range" id="colorHInput" style="background:linear-gradient(to right,hsl(0,60%,50%),hsl(60,60%,50%),hsl(120,60%,50%),hsl(180,60%,50%),hsl(240,60%,50%),hsl(300,60%,50%),hsl(360,60%,50%));"min="0" max="360"></div><div class="colorset"><label for="colorSInput">彩度</label><input type="range" id="colorSInput" min="0" max="100"></div><div class="colorset"><label for="colorLInput">輝度</label><input type="range" id="colorLInput" min="0" max="100"></div></div></div>
 <div class="diceItem" data-range="1 to  6 / 1 to 3 * 1" data-method="add" data-name="1d3"><div class="diceTitle"></div><div class="diceBody"></div></div>
 <div class="diceItem" data-range="1 to  4 / 1 to 4 * 1" data-method="add" data-name="1d4"><div class="diceTitle"></div><div class="diceBody"></div></div>
 <div class="diceItem" data-range="1 to  6 / 1 to 6 * 1" data-method="add" data-name="1d6"><div class="diceTitle"></div><div class="diceBody"></div></div>
