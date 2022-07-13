@@ -1,0 +1,87 @@
+::-webkit-scrollbar{display:none;}
+*{margin:0;padding:0;user-select:none;}
+body{font-family:'メイリオ', 'Meiryo','ＭＳ ゴシック','Hiragino Kaku Gothic ProN','ヒラギノ角ゴ ProN W3',sans-serif;}
+html,body,#container{width:100%;height:100%;}
+
+#container{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, 400px);
+    grid-row-gap: 20px;
+    grid-column-gap: 20px;
+    justify-content: center;
+}
+.diceBody > svg{
+    width: 100px;
+    height: 100px;
+}
+@media screen and (max-width:480px){
+    #container{
+        grid-template-columns: repeat(auto-fit, calc(100vw - 10px));
+    }
+    .diceBody > svg{
+        width: 70px;
+        height: 70px;
+    }
+}
+.diceItem{
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    font-size: 2rem;
+    background-color: var(--bgcolor);
+    border-radius: 20px;
+}
+.diceTitle{
+    width:100%;
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-top-right-radius: 20px;
+    border-top-left-radius: 20px;
+}
+.diceBody{
+    margin: auto 0 auto 0;
+    padding: 1rem;
+}
+.diceResult{
+    font-size:2rem;
+    font-weight: bold;
+    text-align: center;
+}
+.settings > .diceBody{
+    display: flex;
+    width:90%;
+    align-items: stretch;
+    flex-direction: column;
+}
+.settings > .diceBody > div{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.settings input[type=range]{
+    -webkit-appearance: none;
+    appearance: none;
+    width: 80%;
+    height: 20px;
+    border-radius: 30px;
+    margin: 1rem;
+    outline: 0;
+    box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.2);
+}
+input[type=range]#colorHInput{
+    background: linear-gradient(to right, hsl(0,60%,50%),hsl(60,60%,50%),hsl(120,60%,50%),hsl(180,60%,50%),hsl(240,60%,50%),hsl(300,60%,50%),hsl(360,60%,50%));
+}
+input[type=range]#colorLInput{
+    background: linear-gradient(to right, hsl(0,50%,0%),hsl(0,50%,20%),hsl(0,50%,40%),hsl(0,50%,60%),hsl(0,50%,80%),hsl(0,50%,100%));
+}
+.settings input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;   
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid #000;
+    background-color: var(--bgcolor);
+    box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.2);
+}
