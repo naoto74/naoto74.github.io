@@ -20,7 +20,7 @@ let colorLInput = document.getElementById("colorLInput");
 let container = document.getElementById("container");
 let DiceSound = document.getElementById("DiceSound");
 let diceItem = container.querySelectorAll(".diceItem[data-range]");
-let JavaSparrowItem = container.querySelector(".diceJavaSparrow");
+let JavaSparrowItem = document.getElementById("diceJavaSparrow");
 
 let bgcolorH = 340;
 let bgcolorS = 18;

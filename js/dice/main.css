@@ -1,6 +1,6 @@
 ::-webkit-scrollbar{display:none;}
 *{margin:0;padding:0;user-select:none;}
-body{font-family:'メイリオ', 'Meiryo','ＭＳ ゴシック','Hiragino Kaku Gothic ProN','ヒラギノ角ゴ ProN W3',sans-serif;}
+body{font-family:'メイリオ','Meiryo','ＭＳ ゴシック','Hiragino Kaku Gothic ProN','ヒラギノ角ゴ ProN W3',sans-serif;}
 html,body,#container{width:100%;height:100%;}
 
 #container{
@@ -30,14 +30,11 @@ html,body,#container{width:100%;height:100%;}
     flex-direction: column;
     font-size: 2rem;
     background-color: var(--bgcolor);
-    border-radius: 20px;
 }
 .diceTitle{
     width:100%;
     text-align: center;
     background-color: rgba(0, 0, 0, 0.2);
-    border-top-right-radius: 20px;
-    border-top-left-radius: 20px;
 }
 .diceBody{
     margin: auto 0 auto 0;
@@ -64,10 +61,8 @@ html,body,#container{width:100%;height:100%;}
     appearance: none;
     width: 80%;
     height: 20px;
-    border-radius: 30px;
     margin: 1rem;
     outline: 0;
-    box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.2);
 }
 input[type=range]#colorHInput{
     background: linear-gradient(to right, hsl(0,60%,50%),hsl(60,60%,50%),hsl(120,60%,50%),hsl(180,60%,50%),hsl(240,60%,50%),hsl(300,60%,50%),hsl(360,60%,50%));
@@ -78,10 +73,8 @@ input[type=range]#colorLInput{
 .settings input[type=range]::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;   
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
+    width: 30px;
+    height: 30px;
     border: 2px solid #000;
     background-color: var(--bgcolor);
-    box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.2);
 }
