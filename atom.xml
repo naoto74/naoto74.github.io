@@ -7,7 +7,14 @@
   </author>
   <link rel="alternate" type="text/html" href="https://naoto74.github.io/" />
   <self type="application/atom+xml" href="https://naoto74.github.io/atom.xml" />
-  <updated>2022-07-04T17:49:15+09:00</updated>
+  <updated>2022-07-13T23:21:28+09:00</updated>
+  <entry>
+    <title>TRPG|クトゥルフ神話に使えるダイスロールサイト</title>
+    <updated>2022-07-13T23:10:03+09:00</updated>
+    <id>https://naoto74.github.io/js/dice/</id>
+    <link rel="alternate" type="text/html" href="https://naoto74.github.io/js/dice/" />
+    <summary>TRPG|クトゥルフ神話に使えるダイスロールサイト</summary>
+  </entry>
   <entry>
     <title>JavaScriptとcanvasで等角図</title>
     <updated>2022-07-03T19:02:20+09:00</updated>
@@ -35,13 +42,6 @@
     <id>https://naoto74.github.io/js/Mandelbrot-set/</id>
     <link rel="alternate" type="text/html" href="https://naoto74.github.io/js/Mandelbrot-set/" />
     <summary>JavaScriptとGLSLを使ってマンデルブロ集合を計算してみました。GLSLによる並列処理でCPUよりあまりカクカクしていません。</summary>
-  </entry>
-  <entry>
-    <title>クトゥルフ神話|TRPG ダイスロールツール</title>
-    <updated>2022-07-02T12:36:32+09:00</updated>
-    <id>https://naoto74.github.io/js/dice/</id>
-    <link rel="alternate" type="text/html" href="https://naoto74.github.io/js/dice/" />
-    <summary>[参考サイト]を参考にしてJavaScriptとSVGで作ったクトゥルフ神話|TRPGでダイスロールするときに使っている自作ダイスです。ページの読み込みが速くなるように作りました。</summary>
   </entry>
   <entry>
     <title>手書き数字を読み取るAI(TensorFlow)</title>
