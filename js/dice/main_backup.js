@@ -1,11 +1,11 @@
-(function(){"use strict";
+(()=>{"use strict";
+let getElementById = id => document.getElementById(id);
 // ==============================警告！　このプログラムは汚いです==============================
 // 
 // ===目次===
 // 
 //  17~     変数の定義
 // 
-//  43      void     init(void)                                  初期する処理の関数
 //  79      void     createDiceWindow(Element diceItem)          ダイスの窓を作る関数
 // 128      void     createJavaSparrowWindow(Element diceItem)   鳥専用の窓を作る関数
 // 153      object   diceRangeReader(string data_range)          ダイスのdata属性を読み取る関数
@@ -14,13 +14,13 @@
 // 作成日 2022/7/05
 // 公開日 2022/7/13
 // 最終更新日 2022/7/14
-let colorHInput = document.getElementById("colorHInput");
-let colorSInput = document.getElementById("colorSInput");
-let colorLInput = document.getElementById("colorLInput");
-let container = document.getElementById("container");
-let DiceSound = document.getElementById("DiceSound");
+let colorHInput = getElementById("colorHInput");
+let colorSInput = getElementById("colorSInput");
+let colorLInput = getElementById("colorLInput");
+let container = getElementById("container");
+let DiceSound = getElementById("DiceSound");
 let diceItem = container.querySelectorAll(".diceItem[data-range]");
-let JavaSparrowItem = document.getElementById("diceJavaSparrow");
+let JavaSparrowItem = getElementById("diceJavaSparrow");
 
 let bgcolorH = colorHInput.value = 340;
 let bgcolorS = colorSInput.value = 18;
@@ -37,10 +37,8 @@ const JavaSparrowSettings = [
     {head:"none",body:"#ccc",face:"#fff",filter:true},//白多め ごま文鳥
 ];
 resetInputStyle();
-addEventListener("load",init,{once:true});
-
 // 初期処理
-function init(){
+addEventListener("load",()=>{
     let dice1to6 = '<polygon points="5,5 95,5 95,95 5,95" stroke="#d8d8d8" stroke-width="3" stroke-linejoin="round" fill="#fff"/>';
     diceSVGList["1 to 6"] = {
         "init":dice1to6+'<text x="50" y="50" text-anchor="middle" dominant-baseline="central" stroke="#000" stroke-width="3" font-size="80" stroke-linejoin="round" font-family="monospace">?</text>',
@@ -74,7 +72,9 @@ function init(){
     colorHInput.addEventListener("input",()=>{resetInputStyle();},{passive:true});
     colorSInput.addEventListener("input",()=>{resetInputStyle();},{passive:true});
     colorLInput.addEventListener("input",()=>{resetInputStyle();},{passive:true});
-};
+},{once:true});
+
+
 // ダイスの窓
 function createDiceWindow(item){
     let diceBody = item.getElementsByClassName("diceBody")[0];
