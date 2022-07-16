@@ -1,12 +1,12 @@
-const version = "SimpleDiceVer.1.0";
+const version = "Ver.1.5";
 self.addEventListener("install",e=>{
     e.waitUntil(
         caches.open(version).then(cache=>{
             return cache.addAll([
                 "./index.html",
-                "./diceAudio.mp3",
                 "./main.css",
-                "./main.js",
+                "./manifest.json",
+                "./pwa-logo.png",
                 "./sw.js"
             ]);
         })
