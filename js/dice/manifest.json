@@ -1,0 +1,70 @@
+{
+    "short_name": "シンプルダイスロールサイト",
+    "name": "超シンプルダイスロールサイト",
+    "start_url": "https://naoto74.github.io/js/dice/",
+    "display": "standalone",
+    "icons": [
+        {
+            "src": "./images/image512x512.png",
+            "type": "image/png",
+            "sizes": "512x512"
+        },
+        {
+            "src": "./images/image500x500.png",
+            "type": "image/png",
+            "sizes": "500x500"
+        },
+        {
+            "src": "./images/image300x300.png",
+            "type": "image/png",
+            "sizes": "300x300"
+        },
+        {
+            "src": "./images/image256x256.png",
+            "type": "image/png",
+            "sizes": "256x256"
+        },
+        {
+            "src": "./images/image192x192.png",
+            "type": "image/png",
+            "sizes": "192x192"
+        },
+        {
+            "src": "./images/image128x128.png",
+            "type": "image/png",
+            "sizes": "128x128"
+        },
+        {
+            "src": "./images/image100x100.png",
+            "type": "image/png",
+            "sizes": "100x100"
+        },
+        {
+            "src": "./images/image64x64.png",
+            "type": "image/png",
+            "sizes": "64x64"
+        },
+        {
+            "src": "./images/image48x48.png",
+            "type": "image/png",
+            "sizes": "48x48"
+        },
+        {
+            "src": "./images/image32x32.png",
+            "type": "image/png",
+            "sizes": "32x32"
+        },
+        {
+            "src": "./images/image24x24.png",
+            "type": "image/png",
+            "sizes": "24x24"
+        },
+        {
+            "src": "./images/image16x16.png",
+            "type": "image/png",
+            "sizes": "16x16"
+        }
+    ],
+    "background_color": "#2196F3",
+    "orientation": "portrait"
+}
