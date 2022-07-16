@@ -7,13 +7,20 @@
   </author>
   <link rel="alternate" type="text/html" href="https://naoto74.github.io/" />
   <self type="application/atom+xml" href="https://naoto74.github.io/atom.xml" />
-  <updated>2022-07-14T18:47:57+09:00</updated>
+  <updated>2022-07-16T14:01:59+09:00</updated>
   <entry>
-    <title>TRPG|クトゥルフ神話に使えるダイスロールサイト</title>
-    <updated>2022-07-14T18:00:12+09:00</updated>
+    <title>JavaScriptで作った趣味の作品 TOP</title>
+    <updated>2022-07-16T14:00:47+09:00</updated>
+    <id>https://naoto74.github.io/</id>
+    <link rel="alternate" type="text/html" href="https://naoto74.github.io/" />
+    <summary>このサイトではJavaScriptで作ったツール、数学、アートに関するプログラムをSVGやHTMLのcanvasやGLSLを使いそれを公開しています。</summary>
+  </entry>
+  <entry>
+    <title>超シンプル！クトゥルフ神話に使えるダイスロールサイト</title>
+    <updated>2022-07-16T14:00:24+09:00</updated>
     <id>https://naoto74.github.io/js/dice/</id>
     <link rel="alternate" type="text/html" href="https://naoto74.github.io/js/dice/" />
-    <summary>TRPG|クトゥルフ神話に使えるダイスロールサイト</summary>
+    <summary>超シンプル！クトゥルフ神話に使えるダイスロールサイト</summary>
   </entry>
   <entry>
     <title>JavaScriptとcanvasで等角図</title>
@@ -28,13 +35,6 @@
     <id>https://naoto74.github.io/js/Belousov-Zhabotinsky-reaction/</id>
     <link rel="alternate" type="text/html" href="https://naoto74.github.io/js/Belousov-Zhabotinsky-reaction/" />
     <summary>JavaScriptとGLSLを使ってBZ反応の再現をしてみました。GLSLによる並列処理でかなり速い演算ができています。</summary>
-  </entry>
-  <entry>
-    <title>JavaScriptで作った趣味の作品 TOP</title>
-    <updated>2022-07-03T17:43:49+09:00</updated>
-    <id>https://naoto74.github.io/</id>
-    <link rel="alternate" type="text/html" href="https://naoto74.github.io/" />
-    <summary>このサイトではJavaScriptで作ったツール、数学、アートに関するプログラムをSVGやHTMLのcanvasやGLSLを使いそれを公開しています。</summary>
   </entry>
   <entry>
     <title>GLSLでマンデルブロ集合 Mandelbrot set</title>
