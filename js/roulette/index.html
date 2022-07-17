@@ -22,8 +22,8 @@
     <div class="mainContent">
         <div class="contentTitle"><h1>JavaScriptでルーレット</h1></div>
         <p class="summary">JavaScriptを使ってルーレットを作ってみました。</p>
+        <a href="https://web.analogstd.com/tips/posts/js/cubic-bezier.php" target="_blank">Javascriptでcubic-bezierを計算する</a>
         <a href="https://jp.piliapp.com/random/wheel/" target="_blank">参考にした動き</a>
-        <a href="https://fuuno.net/ani/ani41/ani41.html" target="_blank">参考にしたSVG</a>
         
         <div class="contentBody">
             <h2 class="URLtitle">JavaScriptとSVGとCSSでルーレットを回転させる</h2>
@@ -57,6 +57,9 @@
     roulettePointer.setAttribute("stroke","white");
     roulette.appendChild(roulettePointer);
 
+    var duration = 8000; //8000ms
+    var rouletteCubicBezier = [0.24, -0.1, 0.05, 1];
+    var movement = cubicBezier(...rouletteCubicBezier);;
     var rouletteSize = 100;             //円盤の大きさ
     var rouletteTurnFlg = false;
     var textMargin = 30;                //字の中心からの空白
@@ -68,6 +71,8 @@
         var offsetCount = 0;
         roulette.setAttribute("viewBox",`${-rouletteSize} ${-rouletteSize} ${rouletteSize*2+20} ${rouletteSize*2+20}`);
         rouletteGroup.style.transform = "rotate("+rouletteAngle+"deg)";
+        rouletteGroup.style.transitionDuration = duration+"ms";
+        rouletteGroup.style.transitionTimingFunction = "cubic-bezier("+rouletteCubicBezier.join(",")+")";
         //最後の子要素があるまで 子要素を削除
         while(rouletteGroup.lastChild) rouletteGroup.removeChild(rouletteGroup.lastChild);
 
@@ -103,17 +108,31 @@
         }
         roulettePointer.setAttribute("d",`M${rouletteSize+10},-10 L${rouletteSize-10},0 L${rouletteSize+10},10 Z`);
     }
-    function resultOfRoulette(mode){
-        //true:要素の見かけから計算 false,undefined:rouletteAngleから計算
-        if(mode){
-            //ポインターの位置
-            var position = roulettePointer.getBoundingClientRect();
-            //ポインターの先にある要素
-            var element = document.elementFromPoint(position.x-5,position.y+position.height/2);
-            return element.dataset.text;
-        }else{
-            return circleData[Math.floor( ((rouletteAngle%360)/(360/circleData.length)) )%circleData.length];
+    function resultOfRoulette(start, end, time){
+        var val = (movement(time) * (end - start) + start + 360) % 360;
+        var result = circleData[Math.floor( val / 360 * circleData.length)];
+        return result;
+    }
+    async function turnRoulette(){
+        var startTime = new Date();
+        var startAngle = rouletteAngle;
+        rouletteAngle += Math.random()*1000+10000;
+        rouletteGroup.style.transform = `rotate(${rouletteAngle}deg)`;
+        rouletteTurnFlg = true;
+        var nowText = resultOfRoulette(startAngle, rouletteAngle, 0);
+        var oldText;
+        while(rouletteTurnFlg){
+            oldText = nowText;
+            nowText = resultOfRoulette(startAngle, rouletteAngle, (new Date() - startTime) / duration);
+            if(oldText != nowText){
+                playSound();
+            }
+            await (new Promise(e=>setTimeout(e,50)));
         }
+    }
+    
+    function createSVG(tagName){
+        return document.createElementNS("http://www.w3.org/2000/svg",tagName);
     }
     function playSound(){
         if(audioContext == null){
@@ -133,33 +152,54 @@
         audioSource.connect(audioContext.destination);
         audioSource.start(0);
     }
-    async function turnRoulette(){
-        rouletteAngle += Math.random()*1000+10000;
-        rouletteGroup.style.transform = `rotate(${rouletteAngle}deg)`;
-        rouletteTurnFlg = true;
-        var nowText = resultOfRoulette(true);
-        var oldText;
-        while(rouletteTurnFlg){
-            oldText = nowText;
-            nowText = resultOfRoulette(true);
-            if(oldText != nowText){
-                playSound();
+    // https://web.analogstd.com/tips/posts/js/cubic-bezier.php
+    // Cubic-Bezierの値を計算する関数を生成する関数	
+    function cubicBezier($x1, $y1, $x2, $y2){
+        // Refer: http://www.moshplant.com/direct-or/bezier/math.html
+        var cx = 3 * $x1,
+            bx = 3 * ($x2 - $x1) - cx,
+            ax = 1 - cx - bx;
+        var cy = 3 * $y1,
+            by = 3 * ($y2 - $y1) - cy,
+            ay = 1 - cy - by;
+        // 媒介変数表示したX座標
+        var bezierX = function ($t) {
+            return $t * (cx + $t * (bx + $t * ax));
+        };
+        // X座標のt微分
+        var bezierDX = function($t){
+            return cx + $t * (2 * bx + 3 * ax * $t);
+        };
+        // ニュートン法で数値解析する
+        var newtonRaphson = function($x){
+            if($x <= 0){
+                return 0;
             }
-            await (new Promise(e=>setTimeout(e,50)));
-        }
-    }
-    
-    function createSVG(tagName){
-        return document.createElementNS("http://www.w3.org/2000/svg",tagName);
-    }
+            if($x >= 1){
+                return 1;
+            }
+            var prev, t = $x;
+            do{
+                prev = t;
+                t = t - ((bezierX(t) - $x) / bezierDX(t));
+            } while(Math.abs(t - prev) > 1e-4);   // 1e-2 程度でも良い
+            return t;
+        };
+        return function($t){
+            // X座標(時刻)に対応する媒介変数tの値を取得する
+            var t = newtonRaphson($t);
+            // Y座標(Easing量)を計算する
+            return t * (cy + t * (by + t * ay));
+        };
+    };
     //クリックイベント
-    rouletteGroup.addEventListener("mousedown",function(e){turnRoulette();},{passive:true});
-    rouletteGroup.addEventListener("touchstart",function(e){turnRoulette();},{passive:true});
+    rouletteGroup.addEventListener("mousedown",function(){turnRoulette();},{passive:true});
+    rouletteGroup.addEventListener("touchstart",function(){turnRoulette();},{passive:true});
 
     //アニメーション終了イベント
     rouletteGroup.addEventListener("transitionend",function(e){
         rouletteTurnFlg = false;
-        rouletteResult.innerText = resultOfRoulette()+"!";
+        rouletteResult.innerText = resultOfRoulette(rouletteAngle, rouletteAngle, 1)+"!";
     },{passive:true});
 
     
@@ -171,10 +211,6 @@
 }
 #roulette{
     width:500px;
-}
-#rouletteGroup{
-    transition-duration: 8s;
-    transition-timing-function: cubic-bezier(0.24, -0.1, 0.05, 1);
 }
 #rouletteGroup text{
     stroke:#000;
