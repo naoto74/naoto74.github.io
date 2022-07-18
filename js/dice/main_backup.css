@@ -14,7 +14,7 @@ height:100px;
 #container{grid-template-columns:repeat(auto-fit,calc(100vw - 10px));}
 svg{width:70px;height:70px;}
 }
-.diceItem{
+.diceItem,.diceItem2,#diceJavaSparrow{
 position:relative;
 display:flex;
 align-items:center;
