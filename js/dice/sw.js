@@ -1,4 +1,4 @@
-const version = "SimpleDiceVer.1.10";
+const version = "SimpleDiceVer.2.0";
 self.addEventListener("install",e=>{
     e.waitUntil(
         caches.open(version).then(cache=>{
