@@ -5,26 +5,28 @@ let _addEventListener = "addEventListener";
 // ==============================警告！　このプログラムはMinifyされやすいように作られているので汚いです。==============================
 // 
 // 
-// 
-// void     createDiceWindow(Element diceItem)          ダイスの窓を作る関数
-// void     resetInputStyle(void)                       色の選択の背景をセットする関数
-// 
 // 作成日 2022/7/05
 // 公開日 2022/7/13
-// 最終更新日 2022/7/19
+// 最終更新日 2022/7/22
+
+let SVG100x100Template = document.createElementNS("http://www.w3.org/2000/svg","svg");
+SVG100x100Template.setAttribute("viewBox","0 0 100 100");
+
+
+const diceTagTemplate = document[_getElementById]("dice-tag");
+const javasparrowTagTemplate = document[_getElementById]("javasparrow-tag");
+
+
+
 let colorHInput = document[_getElementById]("colorHInput");
 let colorSInput = document[_getElementById]("colorSInput");
 let colorLInput = document[_getElementById]("colorLInput");
 let DiceSound = document[_getElementById]("DiceSound");
-let diceItem = document.getElementsByClassName("diceItem");
-let JavaSparrowItem = document[_getElementById]("diceJavaSparrow");
-let diceWindowTemplate = document[_getElementById]("diceWindowTemplate");
-let SVG100x100Template = document.createElementNS("http://www.w3.org/2000/svg","svg");
-SVG100x100Template.setAttribute("viewBox","0 0 100 100");
 
 let bgcolorH = colorHInput.value = 340;
 let bgcolorS = colorSInput.value = 18;
 let bgcolorL = colorLInput.value = 80;
+
 
 const diceSVGList = {"1 to 6":{},"0 to 20":{},"1 to 4":{},"j":{}};
 
@@ -36,7 +38,7 @@ const JavaSparrowSettings = [
     {h:"none",b:"#ccc",g:"#fff",f:true},//白多め ごま文鳥
 ];
 resetInputStyle();
-// 初期処理
+
 window[_addEventListener]("load",()=>{
     let dice1to6 = '<polygon points="5,5 95,5 95,95 5,95" stroke="#d8d8d8" stroke-width="3" stroke-linejoin="round" fill="#fff"/>';
     diceSVGList["1 to 6"] = {
@@ -65,91 +67,92 @@ window[_addEventListener]("load",()=>{
         .replaceAll("$g$",JavaSparrowSettings[i].g)
         .replaceAll("$g2$",JavaSparrowSettings[i].g=="none"?"none":"#000");
     }
-    //
-    for(let i=0;i<diceItem.length;i++)createDiceWindow(diceItem[i]);
-    {
-        let clone = diceWindowTemplate.content.cloneNode(true);
-        let diceBody = clone[_querySelector](".diceBody");
-        clone[_querySelector](".diceTitle").textContent = "JavaSparrow";
-        clone[_querySelector](".diceResult").remove();
-        let diceChildren = [];
-        let SVG230x210Template = document.createElementNS("http://www.w3.org/2000/svg","svg");
-        SVG230x210Template.setAttribute("viewBox","0 0 230 210");
-        for(let i=0;i<JavaSparrowSettings.length;i++){
-            diceChildren[i] = SVG230x210Template.cloneNode(true);
-            diceChildren[i].innerHTML = diceSVGList["j"].init;
-            diceBody.appendChild(diceChildren[i]);
-        };
-        JavaSparrowItem[_addEventListener]("click",()=>{
-            DiceSound.currentTime=0;
-            DiceSound.play();
-            for(let loopcount=0;loopcount<15;loopcount++){
-                ((_loopcount)=>{setTimeout(()=>{
-                    for(let i=0;i<JavaSparrowSettings.length;i++){
-                        diceChildren[i].innerHTML = diceSVGList["j"][`${Math.floor(JavaSparrowSettings.length*Math.random())}`];
-                    };
-                },_loopcount);})(loopcount*100);
-            }
-        },{passive:true});
-        JavaSparrowItem.appendChild(clone);
-    };
+    customElements.define("dice-tag",class extends HTMLElement{
+        constructor(){
+            super();
+            const clone = diceTagTemplate.content.cloneNode(true);
+            this.attachShadow({mode:"open"}).appendChild(clone);
+            let diceBody = this[_querySelector]("[slot=body]");
+            let range = [];
+            this.dataset.range.split(" + ").map(e=>{
+                let g = e.match(/(?<dirmin>\d+)\s+to\s+(?<dirmax>\d+)\s+\/\s+(?<min>\d+)\s+to\s+(?<max>\d+)\s+\*\s+(?<count>\d+)/).groups
+                for(let j=0;j<g.count;j++){
+                    range.push({dirmin:Number(g.dirmin),dirmax:Number(g.dirmax),min:Number(g.min),max:Number(g.max)});
+                };
+            });
+            let name = this.dataset.name;
+            let method = this.dataset.method;
+            this[_querySelector]("[slot=title]").textContent = name;
+            let diceChildren = [];
+            for(let i=0;i<range.length;i++){
+                diceChildren[i] = SVG100x100Template.cloneNode(true);
+                diceChildren[i].innerHTML = diceSVGList[`${range[i].dirmin} to ${range[i].dirmax}`].init;
+                diceBody.appendChild(diceChildren[i]);
+            };
+            let resultElement = this[_querySelector]("[slot=result]");
+            this[_addEventListener]("click",()=>{
+                DiceSound.currentTime=0;
+                DiceSound.play();
+                for(let loopcount=0;loopcount<15;loopcount++){
+                    ((_loopcount)=>{setTimeout(()=>{
+                        let sum = 0;
+                        for(let i=0;i<range.length;i++){
+                            let random = range[i].min+Math.floor((range[i].max-range[i].min+1)*Math.random());
+                            diceChildren[i].innerHTML = diceSVGList[`${range[i].dirmin} to ${range[i].dirmax}`][`${random}`];
+                            if(method=="add"){
+                                sum += random;
+                            }else if(method=="dec"){
+                                sum += random*Math.pow(10,range.length-(i+1));
+                            }
+                        };
+                        if(method=="dec" && sum == 0)sum = Math.pow(10, range.length-1)*(range[0].max+1);
+                        if(name=="1d100" && sum>=96){
+                            resultElement.style.color = "#f00";
+                            resultElement.textContent = "ファンブル";
+                        }else if(name=="1d100" && sum<=5){
+                            resultElement.textContent = "クリティカル";
+                            resultElement.style.color = "#ff0";
+                        }else{
+                            resultElement.textContent = sum;
+                            resultElement.style.color = "#000";
+                        }
+                    },_loopcount);})(loopcount*100);
+                }
+            },{passive:true});
+        }
+    });
+    customElements.define("javasparrow-tag",class extends HTMLElement{
+        constructor(){
+            super();
+            let clone = javasparrowTagTemplate.content.cloneNode(true);
+            this.attachShadow({mode:"open"}).appendChild(clone);
+            let diceBody = this[_querySelector]("[slot=body]");
+            this[_querySelector]("[slot=title]").textContent = "JavaSparrow";
+            let diceChildren = [];
+            let SVG230x210Template = document.createElementNS("http://www.w3.org/2000/svg","svg");
+            SVG230x210Template.setAttribute("viewBox","0 0 230 210");
+            for(let i=0;i<JavaSparrowSettings.length;i++){
+                diceChildren[i] = SVG230x210Template.cloneNode(true);
+                diceChildren[i].innerHTML = diceSVGList["j"].init;
+                diceBody.appendChild(diceChildren[i]);
+            };
+            this[_addEventListener]("click",()=>{
+                DiceSound.currentTime=0;
+                DiceSound.play();
+                for(let loopcount=0;loopcount<15;loopcount++){
+                    ((_loopcount)=>{setTimeout(()=>{
+                        for(let i=0;i<JavaSparrowSettings.length;i++){
+                            diceChildren[i].innerHTML = diceSVGList["j"][`${Math.floor(JavaSparrowSettings.length*Math.random())}`];
+                        };
+                    },_loopcount);})(loopcount*100);
+                }
+            },{passive:true});
+        }
+    });
     colorHInput[_addEventListener]("input",()=>{resetInputStyle();},{passive:true});
     colorSInput[_addEventListener]("input",()=>{resetInputStyle();},{passive:true});
     colorLInput[_addEventListener]("input",()=>{resetInputStyle();},{passive:true});
 },{once:true});
-
-// ダイスの窓
-function createDiceWindow(item){
-    let clone = diceWindowTemplate.content.cloneNode(true);
-    let diceBody = clone[_querySelector](".diceBody");
-    let range = [];
-    item.dataset.range.split(" + ").map(e=>{
-        let g = e.match(/(?<dirmin>\d+)\s+to\s+(?<dirmax>\d+)\s+\/\s+(?<min>\d+)\s+to\s+(?<max>\d+)\s+\*\s+(?<count>\d+)/).groups
-        for(let j=0;j<g.count;j++){
-            range.push({dirmin:Number(g.dirmin),dirmax:Number(g.dirmax),min:Number(g.min),max:Number(g.max)});
-        };
-    });
-    let name = item.dataset.name;
-    let method = item.dataset.method;
-    clone[_querySelector](".diceTitle").textContent = name;
-    let diceChildren = [];
-    for(let i=0;i<range.length;i++){
-        diceChildren[i] = SVG100x100Template.cloneNode(true);
-        diceChildren[i].innerHTML = diceSVGList[`${range[i].dirmin} to ${range[i].dirmax}`].init;
-        diceBody.appendChild(diceChildren[i]);
-    };
-    let resultElement = clone[_querySelector](".diceResult");
-    item[_addEventListener]("click",()=>{
-        DiceSound.currentTime=0;
-        DiceSound.play();
-        for(let loopcount=0;loopcount<15;loopcount++){
-            ((_loopcount)=>{setTimeout(()=>{
-                let sum = 0;
-                for(let i=0;i<range.length;i++){
-                    let random = range[i].min+Math.floor((range[i].max-range[i].min+1)*Math.random());
-                    diceChildren[i].innerHTML = diceSVGList[`${range[i].dirmin} to ${range[i].dirmax}`][`${random}`];
-                    if(method=="add"){
-                        sum += random;
-                    }else if(method=="dec"){
-                        sum += random*Math.pow(10,range.length-(i+1));
-                    }
-                };
-                if(method=="dec" && sum == 0)sum = Math.pow(10, range.length-1)*(range[0].max+1);
-                if(name=="1d100" && sum>=96){
-                    resultElement.style.color = "#f00";
-                    resultElement.textContent = "ファンブル";
-                }else if(name=="1d100" && sum<=5){
-                    resultElement.textContent = "クリティカル";
-                    resultElement.style.color = "#ff0";
-                }else{
-                    resultElement.textContent = sum;
-                    resultElement.style.color = "#000";
-                }
-            },_loopcount);})(loopcount*100);
-        }
-    },{passive:true});
-    item.appendChild(clone);
-};
 // 色の選択の背景をセット
 function resetInputStyle(){
     bgcolorH = colorHInput.valueAsNumber;
